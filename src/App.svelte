@@ -30,6 +30,10 @@
     targetPosition: Position.Left
   };
 
+  const slider_1_store = writable(-30);
+  const slider_2_store = writable(4);
+  const slider_3_store = writable(69);
+
   // Set default nodes
   // If no type is selected the default node is used
   // Select a type with the type parameter - match the name to one of the names in the nodeTypes list
@@ -43,7 +47,7 @@
     },
     {
       id: '2',
-      data: { slider1: writable(50), slider2: writable(17), slider3: writable(69) },
+      data: { slider1: slider_1_store, slider2: slider_2_store, slider3: slider_3_store },
       position: { x: -50, y: 0 },
       type: 'synth',
     },
@@ -69,9 +73,13 @@
   let isSynthConnected = false;
   onMount(async () => {
     synth = new Tone.Synth().toDestination();
-    synth.volume.value = -12; // Adjust volume if needed
+    synth.volume.value = -30; // Adjust volume if needed
     await Tone.start(); // Start the audio context
   });
+
+  slider_1_store.subscribe((val) => {
+    change_synth_volume(val);
+  })
 
   // Watch for changes in edges to determine connections
   edges.subscribe((currentEdges) => {
@@ -82,13 +90,28 @@
 
       // If synth is connected to output
       if (synthToOutput && !isSynthConnected) {
-        isSynthConnected = true;
-        synth.triggerAttack("C4"); // Start a constant note
+        enable_synth();
       } else if (!synthToOutput && isSynthConnected) {
-        isSynthConnected = false;
-        synth.triggerRelease(); // Stop the note
+        disable_synth();
       }
     });
+
+  function enable_synth() {
+    isSynthConnected = true;
+    synth.triggerAttack("C4"); // Start a constant note
+  }
+
+  function disable_synth() {
+    isSynthConnected = false;
+    synth.triggerRelease(); // Stop the note
+  }
+
+  function change_synth_volume(val: number) {
+    if (isSynthConnected)
+      synth.set({
+        volume: val
+      })
+    }
 </script>
 
 <div style:height="100vh">

@@ -23,13 +23,13 @@
       <hr>
     </div>
     <div>
-      <i>Amplitude: </i><strong>{$slider1}</strong>
+      <i>Volume: </i><strong>{$slider1}db</strong>
     </div>
     <input
       class="nodrag"
       type="range"
-      min="0"
-      max="100"
+      min="-50"
+      max="50"
       step="1"
       on:input={(evt) => slider1.set(Number(evt.currentTarget?.value))}
       value={$slider1}
