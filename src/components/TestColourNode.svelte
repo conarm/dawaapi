@@ -39,6 +39,7 @@
     .colour {
       padding: 1rem;
       background: #fff;
+      border-radius: var(--xy-node-border-radius, var(--xy-node-border-radius-default));
       border: var(--xy-node-border, var(--xy-node-border-default));
       font-size: 0.7rem;
     }

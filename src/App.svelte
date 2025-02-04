@@ -11,6 +11,7 @@
   } from '@xyflow/svelte';
   import TestColourNode from './components/TestColourNode.svelte';
   import SynthesizerNode from './components/SynthesizerNode.svelte';
+  import AudioOutNode from './components/AudioOutNode.svelte';
   import { onMount } from 'svelte';
   import * as Tone from 'tone';
 
@@ -21,6 +22,7 @@
   const nodeTypes = {
     'colour': TestColourNode,
     'synth': SynthesizerNode,
+    'audio-out': AudioOutNode,
   };
 
   const nodeDefaults = {
@@ -35,26 +37,21 @@
   const nodes = writable<Node[]>([
     {
       id: '1',
-      data: { label: 'Synth' },
-      position: { x: 0, y: 0 },
-    },
-    {
-      id: '2',
-      data: { label: 'Output' },
-      position: { x: 200, y: 200 },
-      ...nodeDefaults
-    },
-    {
-      id: '3',
       data: { color: writable('#ff4000') }, 
       position: { x: 200, y: 0 },
       type: 'colour',
     },
     {
-      id: '4',
-      data: { slider1: writable(50) },
-      position: { x: 150, y: 100 },
+      id: '2',
+      data: { slider1: writable(50), slider2: writable(17), slider3: writable(69) },
+      position: { x: -50, y: 0 },
       type: 'synth',
+    },
+    {
+      id: '3',
+      data: {  },
+      position: { x: 200, y: 200 },
+      type: 'audio-out',
     },
   ]);
 
@@ -80,7 +77,7 @@
   edges.subscribe((currentEdges) => {
     // Hardcoded synth
       const synthToOutput = currentEdges.some(
-        (edge) => edge.source === '1' && edge.target === '2'
+        (edge) => edge.source === '2' && edge.target === '3'
       );
 
       // If synth is connected to output
