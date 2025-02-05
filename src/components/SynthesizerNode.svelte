@@ -19,7 +19,7 @@
   <div class="sliders">
     <!-- No input (target) -->
     <div>
-      Disfunctional Synthesizer
+      Synthesizer
       <hr>
     </div>
     <div>

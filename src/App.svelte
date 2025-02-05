@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { writable } from 'svelte/store';
+  import { writable, get } from 'svelte/store';
   import {
     SvelteFlow,
     Controls,
@@ -84,8 +84,19 @@
   // Watch for changes in edges to determine connections
   edges.subscribe((currentEdges) => {
     // Hardcoded synth
+
+    // const synthToOutput = currentEdges.some(
+    //     (edge) => edge.source === '2' && edge.target === '3'
+    //   );
+
+    // we want to see if there is some edge in the current edges where...
+    // the source node is a synth and the target node is an audio-out
+    // so... we can do get(nodes) to grab all the nodes as an array
+    // then do .find on the result to return TRUE if one of the nodes matches the edge's source ID and the type is a 'synth'
+    // AND one of the nodes matches the edge's target ID and the type is a 'audio-out'
+    // TODO: can we make this more efficient?
       const synthToOutput = currentEdges.some(
-        (edge) => edge.source === '2' && edge.target === '3'
+        (edge) => get(nodes).find(n => (n.id === edge.source && n.type === 'synth')) && get(nodes).find(n => n.id === edge.target && n.type === 'audio-out')
       );
 
       // If synth is connected to output
