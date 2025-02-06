@@ -18,7 +18,7 @@
   import '@xyflow/svelte/dist/style.css';
 
   // Set node types
-  // Set the 'type' property on Nodes in the node array to match any of these typenames
+  // The 'type' property on Nodes in the node array should match any of these typenames (or just not specify 'type')
   const nodeTypes = {
     'colour': TestColourNode,
     'synth': SynthesizerNode,
@@ -100,22 +100,14 @@
     }
   }
 
-  // TODO: implement the below maybe (or do an array of MSs to stop hardcoding)
+  // TODO: implement the array below maybe (or do an array of MSs) to stop hardcoding)
   // let synths: Tone.Synth[] = [];
-
-  // const slider_1_store = writable(-30);
-  // const slider_2_store = writable(0);
-  // const slider_2_store2 = writable(0);
-  // const slider_3_store = writable(69);
 
   const megaSynth1 = new MegaSynth(0, 0, 0);
   const megaSynth2 = new MegaSynth(0, 0, 0);
   const megaSynth3 = new MegaSynth(0, 0, 0);
 
   // Set default nodes
-  // If no type is selected the default node is used
-  // Select a type with the type parameter - match the name to one of the names in the nodeTypes list
-  // Match up the data parameter to the data parameter of the type used - default nodes have a label parameter
   const nodes = writable<Node[]>([
     {
       id: '1',
@@ -153,58 +145,16 @@
   const edges = writable<Edge[]>([
   ]);
 
-
-  // let synth1: Tone.Synth;
-  // let synth2: Tone.Synth;
-  // let isSynthConnected = false;
   onMount(async () => {
-    // synth1 = new Tone.Synth().toDestination();
     // TODO: hardcoding is bad - don't do that
     megaSynth1.to_dest();
     megaSynth2.to_dest();
     megaSynth3.to_dest();
-    // synth1.volume.value = -30; // Adjust volume if needed
-    // synth2 = new Tone.Synth().toDestination();
-    // synth2.volume.value = -30; // Adjust volume if needed
     await Tone.start(); // Start the audio context
   });
 
-  // slider_1_store.subscribe((val) => {
-  //   change_synth_volume(synth1, val);
-  // })
-  // slider_2_store.subscribe((val) => {
-  //   change_synth_pitch(synth1, val);
-  // })
-  // slider_2_store2.subscribe((val) => {
-  //   change_synth_pitch(synth2, val);
-  // })
-
   // Watch for changes in edges to determine connections
   edges.subscribe((currentEdges) => {
-    // Hardcoded synth
-
-    // const synthToOutput = currentEdges.some(
-    //     (edge) => edge.source === '2' && edge.target === '3'
-    //   );
-
-    // we want to see if there is some edge in the current edges where...
-    // the source node is a synth and the target node is an audio-out
-    // so... we can do get(nodes) to grab all the nodes as an array
-    // then do .find on the result to return TRUE if one of the nodes matches the edge's source ID and the type is a 'synth'
-    // AND one of the nodes matches the edge's target ID and the type is a 'audio-out'
-    // TODO: can we make this more efficient?
-      // const synthToOutput = currentEdges.some(
-      //   (edge) => get(nodes).find(n => (n.id === edge.source && n.type === 'synth')) && get(nodes).find(n => n.id === edge.target && n.type === 'audio-out')
-      // );
-
-      // // If synth is connected to output
-      // if (synthToOutput && !isSynthConnected) {
-      //   enable_synth();
-      // } else if (!synthToOutput && isSynthConnected) {
-      //   disable_synth();
-      // }
-
-      // take 3(?) (generic)
       currentEdges.forEach(edge => {
         const nodesList = get(nodes);
         const sourceNode = nodesList.find(n => n.id === edge.source && n.type === 'synth');
