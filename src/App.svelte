@@ -30,8 +30,22 @@
     targetPosition: Position.Left
   };
 
+  const pitches = [
+    "C4",
+    "D4",
+    "E4",
+    "F4",
+    "G4",
+    "A4",
+    "B4",
+    "C5",
+  ]
+
+  // let synths: Tone.Synth[] = [];
+
   const slider_1_store = writable(-30);
-  const slider_2_store = writable(4);
+  const slider_2_store = writable(0);
+  const slider_2_store2 = writable(0);
   const slider_3_store = writable(69);
 
   // Set default nodes
@@ -53,6 +67,12 @@
     },
     {
       id: '3',
+      data: { slider1: slider_1_store, slider2: slider_2_store2, slider3: slider_3_store },
+      position: { x: -150, y: 0 },
+      type: 'synth',
+    },
+    {
+      id: '4',
       data: {  },
       position: { x: 200, y: 200 },
       type: 'audio-out',
@@ -69,16 +89,25 @@
   ]);
 
 
-  let synth: Tone.Synth;
+  let synth1: Tone.Synth;
+  let synth2: Tone.Synth;
   let isSynthConnected = false;
   onMount(async () => {
-    synth = new Tone.Synth().toDestination();
-    synth.volume.value = -30; // Adjust volume if needed
+    synth1 = new Tone.Synth().toDestination();
+    synth1.volume.value = -30; // Adjust volume if needed
+    synth2 = new Tone.Synth().toDestination();
+    synth2.volume.value = -30; // Adjust volume if needed
     await Tone.start(); // Start the audio context
   });
 
   slider_1_store.subscribe((val) => {
-    change_synth_volume(val);
+    change_synth_volume(synth1, val);
+  })
+  slider_2_store.subscribe((val) => {
+    change_synth_pitch(synth1, val);
+  })
+  slider_2_store2.subscribe((val) => {
+    change_synth_pitch(synth2, val);
   })
 
   // Watch for changes in edges to determine connections
@@ -109,20 +138,30 @@
 
   function enable_synth() {
     isSynthConnected = true;
-    synth.triggerAttack("C4"); // Start a constant note
+    synth1.triggerAttack("C4"); // Start a constant note
+    synth2.triggerAttack("C4"); // Start a constant note
   }
 
   function disable_synth() {
     isSynthConnected = false;
-    synth.triggerRelease(); // Stop the note
+    synth1.triggerRelease(); // Stop the note
+    synth2.triggerAttack("C4"); // Start a constant note
   }
 
-  function change_synth_volume(val: number) {
+  function change_synth_volume(synth: Tone.Synth, val: number) {
     if (isSynthConnected)
       synth.set({
         volume: val
       })
+      // synth2.set({
+      //   volume: val
+      // })
     }
+  
+  function change_synth_pitch(synth: Tone.Synth, val: number) {
+  if (isSynthConnected)
+    synth.setNote(pitches[val]);
+  }
 </script>
 
 <div style:height="100vh">
