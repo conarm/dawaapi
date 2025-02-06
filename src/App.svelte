@@ -100,6 +100,7 @@
     }
   }
 
+  // TODO: implement the below maybe (or do an array of MSs to stop hardcoding)
   // let synths: Tone.Synth[] = [];
 
   // const slider_1_store = writable(-30);
@@ -108,7 +109,8 @@
   // const slider_3_store = writable(69);
 
   const megaSynth1 = new MegaSynth(0, 0, 0);
-  // const megaSynth2 = new MegaSynth(0, 0, 0);
+  const megaSynth2 = new MegaSynth(0, 0, 0);
+  const megaSynth3 = new MegaSynth(0, 0, 0);
 
   // Set default nodes
   // If no type is selected the default node is used
@@ -127,14 +129,20 @@
       position: { x: -50, y: 0 },
       type: 'synth',
     },
-    // {
-    //   id: '3',
-    //   data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
-    //   position: { x: -150, y: 0 },
-    //   type: 'synth',
-    // },
+    {
+      id: '3',
+      data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
+      position: { x: -150, y: 0 },
+      type: 'synth',
+    },
     {
       id: '4',
+      data: { slider1: megaSynth3.slider1, slider2: megaSynth3.slider2, slider3: megaSynth3.slider3 },
+      position: { x: -150, y: 0 },
+      type: 'synth',
+    },
+    {
+      id: '5',
       data: {  },
       position: { x: 200, y: 200 },
       type: 'audio-out',
@@ -143,11 +151,6 @@
 
   // Set default edges
   const edges = writable<Edge[]>([
-    // {
-    //   id: '1-2',
-    //   source: '1',
-    //   target: '2',
-    // },
   ]);
 
 
@@ -156,8 +159,10 @@
   // let isSynthConnected = false;
   onMount(async () => {
     // synth1 = new Tone.Synth().toDestination();
+    // TODO: hardcoding is bad - don't do that
     megaSynth1.to_dest();
-    // megaSynth2.to_dest();
+    megaSynth2.to_dest();
+    megaSynth3.to_dest();
     // synth1.volume.value = -30; // Adjust volume if needed
     // synth2 = new Tone.Synth().toDestination();
     // synth2.volume.value = -30; // Adjust volume if needed
@@ -209,12 +214,19 @@
           // Perform your action here
           console.log(`Synth node (${sourceNode.id}) is connected to Audio-Out node (${targetNode.id})`);
           
-          // Example: Call a function or trigger a callback
-          if (sourceNode.id = '2') {
+          // TODO: hardcoding these is bad so don't do that
+          if (sourceNode.id == '2' && !megaSynth1.isConnected) {
+            console.log("Enabling synth 1");
             megaSynth1.enable_synth();
           }
-          // } else {
-          //   megaSynth2.enable_synth();
+          if (sourceNode.id == '3') {
+            console.log("Enabling synth 2");
+            megaSynth2.enable_synth();
+          }
+          if (sourceNode.id == '4') {
+            console.log("Enabling synth 2");
+            megaSynth3.enable_synth();
+          }
         }
       });
     });
