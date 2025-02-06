@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { writable, get } from 'svelte/store';
+  import { writable, get, type Writable } from 'svelte/store';
   import {
     SvelteFlow,
     Controls,
@@ -41,12 +41,74 @@
     "C5",
   ]
 
+  class MegaSynth {
+    // TODO: Rename these to actual slider types
+    slider1: Writable<number>;
+    slider2: Writable<number>;
+    slider3: Writable<number>;
+    myPitch: number;
+    synth: Tone.Synth;
+    isConnected: boolean;
+
+    constructor(initVol: number, initPitch: number, initX: number) {
+      this.isConnected = false;
+      this.slider1 = writable(initVol);
+      this.slider2 = writable(initPitch);
+      // TODO: surely we don't need to track pitch, that's a bit overkill right? why does enable_synth run twice when you first connect the synth
+      // TODO: also why the fuck does the synth not stop when deleted
+      this.myPitch = initPitch;
+      this.slider3 = writable(initX);
+      this.synth = new Tone.Synth();
+      this.synth.setNote(pitches[initPitch]);
+
+      this.slider1.subscribe((val) => {
+        this.change_synth_volume(val);
+      })
+
+      this.slider2.subscribe((val) => {
+        this.change_synth_pitch(val);
+      })
+    }
+
+    to_dest() {
+      this.synth.toDestination();
+    }
+
+    enable_synth() {
+      console.log("Synth enabled - triggering attack");
+      this.isConnected = true;
+      this.synth.triggerAttack(pitches[this.myPitch]); // Start a constant note
+    }
+
+    disable_synth() {
+      console.log("Synth disabled - triggering release");
+      this.isConnected = false;
+      this.synth.triggerRelease(); // Stop the note
+    }
+
+    change_synth_volume(val: number) {
+      console.log("Volume changed");
+      this.synth.set({
+        volume: val
+      })
+      }
+    
+    change_synth_pitch(val: number) {
+      console.log("Pitch changed");
+      this.synth.setNote(pitches[val]);
+      this.myPitch = val;
+    }
+  }
+
   // let synths: Tone.Synth[] = [];
 
-  const slider_1_store = writable(-30);
-  const slider_2_store = writable(0);
-  const slider_2_store2 = writable(0);
-  const slider_3_store = writable(69);
+  // const slider_1_store = writable(-30);
+  // const slider_2_store = writable(0);
+  // const slider_2_store2 = writable(0);
+  // const slider_3_store = writable(69);
+
+  const megaSynth1 = new MegaSynth(0, 0, 0);
+  // const megaSynth2 = new MegaSynth(0, 0, 0);
 
   // Set default nodes
   // If no type is selected the default node is used
@@ -61,16 +123,16 @@
     },
     {
       id: '2',
-      data: { slider1: slider_1_store, slider2: slider_2_store, slider3: slider_3_store },
+      data: { slider1: megaSynth1.slider1, slider2: megaSynth1.slider2, slider3: megaSynth1.slider3 },
       position: { x: -50, y: 0 },
       type: 'synth',
     },
-    {
-      id: '3',
-      data: { slider1: slider_1_store, slider2: slider_2_store2, slider3: slider_3_store },
-      position: { x: -150, y: 0 },
-      type: 'synth',
-    },
+    // {
+    //   id: '3',
+    //   data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
+    //   position: { x: -150, y: 0 },
+    //   type: 'synth',
+    // },
     {
       id: '4',
       data: {  },
@@ -89,26 +151,28 @@
   ]);
 
 
-  let synth1: Tone.Synth;
-  let synth2: Tone.Synth;
-  let isSynthConnected = false;
+  // let synth1: Tone.Synth;
+  // let synth2: Tone.Synth;
+  // let isSynthConnected = false;
   onMount(async () => {
-    synth1 = new Tone.Synth().toDestination();
-    synth1.volume.value = -30; // Adjust volume if needed
-    synth2 = new Tone.Synth().toDestination();
-    synth2.volume.value = -30; // Adjust volume if needed
+    // synth1 = new Tone.Synth().toDestination();
+    megaSynth1.to_dest();
+    // megaSynth2.to_dest();
+    // synth1.volume.value = -30; // Adjust volume if needed
+    // synth2 = new Tone.Synth().toDestination();
+    // synth2.volume.value = -30; // Adjust volume if needed
     await Tone.start(); // Start the audio context
   });
 
-  slider_1_store.subscribe((val) => {
-    change_synth_volume(synth1, val);
-  })
-  slider_2_store.subscribe((val) => {
-    change_synth_pitch(synth1, val);
-  })
-  slider_2_store2.subscribe((val) => {
-    change_synth_pitch(synth2, val);
-  })
+  // slider_1_store.subscribe((val) => {
+  //   change_synth_volume(synth1, val);
+  // })
+  // slider_2_store.subscribe((val) => {
+  //   change_synth_pitch(synth1, val);
+  // })
+  // slider_2_store2.subscribe((val) => {
+  //   change_synth_pitch(synth2, val);
+  // })
 
   // Watch for changes in edges to determine connections
   edges.subscribe((currentEdges) => {
@@ -124,44 +188,36 @@
     // then do .find on the result to return TRUE if one of the nodes matches the edge's source ID and the type is a 'synth'
     // AND one of the nodes matches the edge's target ID and the type is a 'audio-out'
     // TODO: can we make this more efficient?
-      const synthToOutput = currentEdges.some(
-        (edge) => get(nodes).find(n => (n.id === edge.source && n.type === 'synth')) && get(nodes).find(n => n.id === edge.target && n.type === 'audio-out')
-      );
+      // const synthToOutput = currentEdges.some(
+      //   (edge) => get(nodes).find(n => (n.id === edge.source && n.type === 'synth')) && get(nodes).find(n => n.id === edge.target && n.type === 'audio-out')
+      // );
 
-      // If synth is connected to output
-      if (synthToOutput && !isSynthConnected) {
-        enable_synth();
-      } else if (!synthToOutput && isSynthConnected) {
-        disable_synth();
-      }
+      // // If synth is connected to output
+      // if (synthToOutput && !isSynthConnected) {
+      //   enable_synth();
+      // } else if (!synthToOutput && isSynthConnected) {
+      //   disable_synth();
+      // }
+
+      // take 3(?) (generic)
+      currentEdges.forEach(edge => {
+        const nodesList = get(nodes);
+        const sourceNode = nodesList.find(n => n.id === edge.source && n.type === 'synth');
+        const targetNode = nodesList.find(n => n.id === edge.target && n.type === 'audio-out');
+
+        if (sourceNode && targetNode) {
+          // Perform your action here
+          console.log(`Synth node (${sourceNode.id}) is connected to Audio-Out node (${targetNode.id})`);
+          
+          // Example: Call a function or trigger a callback
+          if (sourceNode.id = '2') {
+            megaSynth1.enable_synth();
+          }
+          // } else {
+          //   megaSynth2.enable_synth();
+        }
+      });
     });
-
-  function enable_synth() {
-    isSynthConnected = true;
-    synth1.triggerAttack("C4"); // Start a constant note
-    synth2.triggerAttack("C4"); // Start a constant note
-  }
-
-  function disable_synth() {
-    isSynthConnected = false;
-    synth1.triggerRelease(); // Stop the note
-    synth2.triggerAttack("C4"); // Start a constant note
-  }
-
-  function change_synth_volume(synth: Tone.Synth, val: number) {
-    if (isSynthConnected)
-      synth.set({
-        volume: val
-      })
-      // synth2.set({
-      //   volume: val
-      // })
-    }
-  
-  function change_synth_pitch(synth: Tone.Synth, val: number) {
-  if (isSynthConnected)
-    synth.setNote(pitches[val]);
-  }
 </script>
 
 <div style:height="100vh">
