@@ -16,6 +16,7 @@
   import * as Tone from 'tone';
 
   import '@xyflow/svelte/dist/style.css';
+    import type { OmniOscillatorType } from 'tone/build/esm/source/oscillator/OscillatorInterface';
 
   // Set node types
   // The 'type' property on Nodes in the node array should match any of these typenames (or just not specify 'type')
@@ -39,6 +40,19 @@
     "A4",
     "B4",
     "C5",
+    "D5",
+    "E5",
+    "F5",
+    "G5",
+    "A5",
+    "B5",
+  ]
+
+  const shapes: OmniOscillatorType[] = [
+    "sine",
+    "square",
+    "triangle",
+    "sawtooth",
   ]
 
   class MegaSynth {
@@ -46,20 +60,19 @@
     slider1: Writable<number>;
     slider2: Writable<number>;
     slider3: Writable<number>;
-    myPitch: number;
+    pitch: number;
     synth: Tone.Synth;
     isConnected: boolean;
+    id: string;
 
-    constructor(initVol: number, initPitch: number, initX: number) {
+    constructor(initVol: number, initPitch: number, initX: number, id: string) {
       this.isConnected = false;
       this.slider1 = writable(initVol);
       this.slider2 = writable(initPitch);
       // TODO: surely we don't need to track pitch, that's a bit overkill right? why does enable_synth run twice when you first connect the synth
-      // TODO: also why the fuck does the synth not stop when deleted
-      this.myPitch = initPitch;
+      this.pitch = initPitch;
       this.slider3 = writable(initX);
       this.synth = new Tone.Synth();
-      this.synth.setNote(pitches[initPitch]);
 
       this.slider1.subscribe((val) => {
         this.change_synth_volume(val);
@@ -68,19 +81,23 @@
       this.slider2.subscribe((val) => {
         this.change_synth_pitch(val);
       })
-    }
 
-    to_dest() {
+      this.slider3.subscribe((val) => {
+        this.change_synth_shape(val);
+      })
+
+      this.id = id;
+
       this.synth.toDestination();
     }
 
-    enable_synth() {
+    enable() {
       console.log("Synth enabled - triggering attack");
       this.isConnected = true;
-      this.synth.triggerAttack(pitches[this.myPitch]); // Start a constant note
+      this.synth.triggerAttack(pitches[this.pitch]); // Start a constant note
     }
 
-    disable_synth() {
+    disable() {
       console.log("Synth disabled - triggering release");
       this.isConnected = false;
       this.synth.triggerRelease(); // Stop the note
@@ -96,16 +113,20 @@
     change_synth_pitch(val: number) {
       console.log("Pitch changed");
       this.synth.setNote(pitches[val]);
-      this.myPitch = val;
+      this.pitch = val;
+    }
+    
+    change_synth_shape(val: number) {
+      console.log("Pitch changed");
+      this.synth.oscillator.type = shapes[val];
     }
   }
 
-  // TODO: implement the array below maybe (or do an array of MSs) to stop hardcoding)
-  // let synths: Tone.Synth[] = [];
-
-  const megaSynth1 = new MegaSynth(0, 0, 0);
-  const megaSynth2 = new MegaSynth(0, 0, 0);
-  const megaSynth3 = new MegaSynth(0, 0, 0);
+  let megaSynths: MegaSynth[] = [
+    new MegaSynth(0, 0, 0, "2"),
+    new MegaSynth(0, 0, 0, "3"),
+    new MegaSynth(0, 0, 0, "4")
+  ];
 
   // Set default nodes
   const nodes = writable<Node[]>([
@@ -116,20 +137,20 @@
       type: 'colour',
     },
     {
-      id: '2',
-      data: { slider1: megaSynth1.slider1, slider2: megaSynth1.slider2, slider3: megaSynth1.slider3 },
+      id: megaSynths[0].id,
+      data: { slider1: megaSynths[0].slider1, slider2: megaSynths[0].slider2, slider3: megaSynths[0].slider3 },
       position: { x: -50, y: 0 },
       type: 'synth',
     },
     {
-      id: '3',
-      data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
+      id: megaSynths[1].id,
+      data: { slider1: megaSynths[1].slider1, slider2: megaSynths[1].slider2, slider3: megaSynths[1].slider3 },
       position: { x: -150, y: 0 },
       type: 'synth',
     },
     {
-      id: '4',
-      data: { slider1: megaSynth3.slider1, slider2: megaSynth3.slider2, slider3: megaSynth3.slider3 },
+      id: megaSynths[2].id,
+      data: { slider1: megaSynths[2].slider1, slider2: megaSynths[2].slider2, slider3: megaSynths[2].slider3 },
       position: { x: -150, y: 0 },
       type: 'synth',
     },
@@ -146,15 +167,15 @@
   ]);
 
   onMount(async () => {
-    // TODO: hardcoding is bad - don't do that
-    megaSynth1.to_dest();
-    megaSynth2.to_dest();
-    megaSynth3.to_dest();
     await Tone.start(); // Start the audio context
   });
 
   // Watch for changes in edges to determine connections
   edges.subscribe((currentEdges) => {
+      // For each edge, check if it goes from a synth to an output
+      // If it does (i.e. source is a synth, output is an audio-out) then enable the synth if it isn't already
+      // We want to disable a synth if a synth is 'connected' but no edge goes from it to audio-out
+      // How the fuck . . .
       currentEdges.forEach(edge => {
         const nodesList = get(nodes);
         const sourceNode = nodesList.find(n => n.id === edge.source && n.type === 'synth');
@@ -163,20 +184,12 @@
         if (sourceNode && targetNode) {
           // Perform your action here
           console.log(`Synth node (${sourceNode.id}) is connected to Audio-Out node (${targetNode.id})`);
-          
-          // TODO: hardcoding these is bad so don't do that
-          if (sourceNode.id == '2' && !megaSynth1.isConnected) {
-            console.log("Enabling synth 1");
-            megaSynth1.enable_synth();
-          }
-          if (sourceNode.id == '3') {
-            console.log("Enabling synth 2");
-            megaSynth2.enable_synth();
-          }
-          if (sourceNode.id == '4') {
-            console.log("Enabling synth 2");
-            megaSynth3.enable_synth();
-          }
+          megaSynths.forEach(megaSynth => {
+            if (sourceNode.id == megaSynth.id && !megaSynth.isConnected) {
+              console.log(`Enabling megasynth ${megaSynth.id}`)
+              megaSynth.enable();
+            }
+          });
         }
       });
     });

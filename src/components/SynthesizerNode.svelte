@@ -55,7 +55,7 @@
       class="nodrag"
       type="range"
       min="0"
-      max="100"
+      max="3"
       step="1"
       on:input={(evt) => slider3.set(Number(evt.currentTarget?.value))}
       value={$slider3}
