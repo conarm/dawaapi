@@ -17,7 +17,9 @@
   </script>
    
   <div class="sliders">
-    <!-- No input (target) -->
+    <!-- Pattern input -->
+    <Handle type="target" position={Position.Left} />
+
     <div>
       Synthesizer
       <hr>
