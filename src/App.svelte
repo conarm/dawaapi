@@ -13,6 +13,7 @@
   import SynthesizerNode from './components/SynthesizerNode.svelte';
   import AudioOutNode from './components/AudioOutNode.svelte';
   import PatternNode from './components/PatternNode.svelte';
+  import DelayNode from './components/DelayNode.svelte';
   import { onMount } from 'svelte';
   import * as Tone from 'tone';
 
@@ -29,6 +30,7 @@
     'synth': SynthesizerNode,
     'audio-out': AudioOutNode,
     'pattern': PatternNode,
+    'delay': DelayNode
   };
 
   const nodeDefaults = {
@@ -98,8 +100,6 @@
       // TODO: don't hardcode pattern through constructor - allow for pattern to be set by a dropdown or an input node
       this.pattern = pattern;
 
-      this.synth.toDestination();
-
       // set melody
       this.part = new Tone.Part((time, event) => 
         { this.synth.triggerAttackRelease(event.note, event.dur, time)},
@@ -122,6 +122,8 @@
       console.log("Synth disabled - triggering release");
       this.isConnected = false;
       this.synth.triggerRelease(); // Stop the note
+      // TODO: keep this here?
+      this.synth.disconnect;
     }
 
     change_synth_volume(val: number) {
@@ -143,10 +145,57 @@
     }
   }
 
+  class MegaDelay {
+    // TODO: Rename these to actual slider types
+    slider1: Writable<number>;
+    slider2: Writable<number>;
+    slider3: Writable<number>;
+    delay: Tone.FeedbackDelay;
+    id: string;
+
+    constructor(initParam1: number, initParam2: number, initParam3: number, id: string) {
+      this.slider1 = writable(initParam1);
+      this.slider2 = writable(initParam2);
+      this.slider3 = writable(initParam3);
+      // TODO: surely we don't need to track pitch, that's a bit overkill right? why does enable_synth run twice when you first connect the synth
+      this.delay = new Tone.FeedbackDelay(0.5);
+
+      this.slider1.subscribe((val) => {
+        this.change_delay_param_1(val);
+      })
+
+      this.slider2.subscribe((val) => {
+        this.change_delay_param_1(val);
+      })
+
+      this.slider3.subscribe((val) => {
+        this.change_delay_param_1(val);
+      })
+
+      this.id = id;
+    }
+
+    change_delay_param_1(val: number) {
+      console.log("Param 1 changed");
+    }
+    
+    change_delay_param_2(val: number) {
+      console.log("Param 2 changed");
+    }
+    
+    change_delay_param_3(val: number) {
+      console.log("Param 3 changed");
+    }
+  }
+
   let megaSynths: MegaSynth[] = [
     new MegaSynth(0, 0, 0, "2", 'none'),
     new MegaSynth(0, 0, 0, "3", 'none'),
     new MegaSynth(0, 0, 0, "4", 'none')
+  ];
+
+  let megaDelays: MegaDelay[] = [
+    new MegaDelay(0, 0, 0, "7"),
   ];
 
   // Set default nodes
@@ -172,7 +221,7 @@
     {
       id: megaSynths[2].id,
       data: { slider1: megaSynths[2].slider1, slider2: megaSynths[2].slider2, slider3: megaSynths[2].slider3 },
-      position: { x: 40, y: -200 },
+      position: { x: 100, y: -200 },
       type: 'synth',
     },
     {
@@ -186,6 +235,12 @@
       data: { currentPattern: writable('pattern1') },
       position: { x: -450, y: -130 },
       type: 'pattern',
+    },
+    {
+      id: '7',
+      data: {  },
+      position: { x: 60, y: 30 },
+      type: 'delay',
     },
   ]);
 
@@ -204,23 +259,55 @@
       // If it does (i.e. source is a synth, output is an audio-out) then enable the synth if it isn't already
       // We want to disable a synth if a synth is 'connected' but no edge goes from it to audio-out
       // TODO: How . . .
+      // Notes:
+      // If a delay node is connected to a synth then we do synth.connect(delay)
+      // Then if our synth is already connected and playing then it will work
+      // If we add another delay
+
       currentEdges.forEach(edge => {
         const nodesList = get(nodes);
         const patternNodeOut = nodesList.find(n => n.id === edge.source && n.type === 'pattern');
+
         const synthNodeIn = nodesList.find(n => n.id === edge.target && n.type === 'synth');
         const synthNodeOut = nodesList.find(n => n.id === edge.source && n.type === 'synth');
-        const outNodeIn = nodesList.find(n => n.id === edge.target && n.type === 'audio-out');
+        
+        const delayNodeIn = nodesList.find(n => n.id === edge.target && n.type === 'delay');
+        const delayNodeOut = nodesList.find(n => n.id === edge.source && n.type === 'delay');
 
+        const outNodeIn = nodesList.find(n => n.id === edge.target && n.type === 'audio-out');
+        
+
+        // TODO: Genericise all of this shite instead of checking for each possible node/edge combination - some kind of traversal?
+        // The section below only works given a pattern, synth, delay and audio-out node
+        // ================================= Call toDest() for nodes connected to output =================================
+        // Are we connected to the Audio-Out node?
+        // If we are, we really want to be calling toDestination on whatever is right before the output
+        // This is provided we have logic setup to call connect() on all the prior nodes in the chain
+        
+        // Synth to Audio-Out
         if (synthNodeOut && outNodeIn) {
-          // A synth is connected to a target
           console.log(`Synth node (${synthNodeOut.id}) is connected to Audio-Out node (${outNodeIn.id})`);
           megaSynths.forEach(megaSynth => {
             if (synthNodeOut.id == megaSynth.id && !megaSynth.isConnected) {
               console.log(`Enabling megasynth ${megaSynth.id}`)
               megaSynth.enable();
+              // TODO: put toDest() in a function?
+              megaSynth.synth.toDestination();
             }
           });
         }
+
+        // Delay to Audio-Out
+        if (delayNodeOut && outNodeIn) {
+          if (delayNodeOut.id == megaDelays[0].id) {
+            console.log(`Delay node (${delayNodeOut.id}) is connected to Audio-Out node (${outNodeIn.id}) - calling toDest()`);
+            // TODO: put toDest() in a function?
+            megaDelays[0].delay.toDestination();
+          }
+        }
+
+        // ===================== Call connect() for nodes not connected to output but connected to other nodes =====================
+        // Pattern to synth
         if (patternNodeOut && synthNodeIn) {
           // A pattern is connected to a synth
           console.log(`Synth node (${patternNodeOut.id}) is connected to Audio-Out node (${synthNodeIn.id})`);
@@ -229,6 +316,21 @@
               console.log(`Enabling pattern ${megaSynth.id}`)
               megaSynth.pattern = 'pattern1';
               megaSynth.disable();
+              megaSynth.enable();
+            }
+          });
+        }
+
+        // Synth to delay
+        if (synthNodeOut && delayNodeIn) {
+          // Connect synth to delay
+          console.log(`Synth node (${synthNodeOut.id}) is connected to Delay node (${delayNodeIn.id})`);
+          megaSynths.forEach(megaSynth => {
+            if (synthNodeOut.id == megaSynth.id) {
+              console.log(`Connecting delay to ${megaSynth.id}`)
+              // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
+              // Note: obviously looping over EVERYTHING is bad...
+              megaSynth.synth.connect(megaDelays[0].delay)
               megaSynth.enable();
             }
           });
