@@ -21,7 +21,7 @@
     <Handle type="target" position={Position.Left} />
 
     <div>
-      Synthesizer
+      <b>Synthesizer</b>
       <hr>
     </div>
     <div>

@@ -21,46 +21,33 @@
     <Handle type="target" position={Position.Left} />
 
     <div>
-      Delay
+      <b>Delay</b>
       <hr>
     </div>
     <div>
-      <i>Param1: </i><strong>{$slider1}</strong>
+      <i>Time: </i><strong>{$slider1}</strong>
     </div>
     <input
       class="nodrag"
       type="range"
-      min="-50"
-      max="50"
-      step="1"
+      min="0"
+      max="1"
+      step="0.01"
       on:input={(evt) => slider1.set(Number(evt.currentTarget?.value))}
       value={$slider1}
     />
 
     <div>
-      <i>Param2: </i><strong>{$slider2}</strong>
+      <i>Feedback: </i><strong>{$slider2}</strong>
     </div>
     <input
       class="nodrag"
       type="range"
       min="0"
-      max="100"
-      step="1"
+      max="1"
+      step="0.01"
       on:input={(evt) => slider2.set(Number(evt.currentTarget?.value))}
       value={$slider2}
-    />
-
-    <div>
-      <i>Param3: </i><strong>{$slider3}</strong>
-    </div>
-    <input
-      class="nodrag"
-      type="range"
-      min="0"
-      max="3"
-      step="1"
-      on:input={(evt) => slider3.set(Number(evt.currentTarget?.value))}
-      value={$slider3}
     />
 
     <!-- Add a source Handle to the right -->

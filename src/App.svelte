@@ -30,7 +30,7 @@
     'synth': SynthesizerNode,
     'audio-out': AudioOutNode,
     'pattern': PatternNode,
-    'delay': DelayNode
+    'delay': DelayNode,
   };
 
   const nodeDefaults = {
@@ -165,11 +165,7 @@
       })
 
       this.slider2.subscribe((val) => {
-        this.change_delay_param_1(val);
-      })
-
-      this.slider3.subscribe((val) => {
-        this.change_delay_param_1(val);
+        this.change_delay_param_2(val);
       })
 
       this.id = id;
@@ -177,26 +173,25 @@
 
     change_delay_param_1(val: number) {
       console.log("Param 1 changed");
+      this.delay.set({delayTime: val});
     }
     
     change_delay_param_2(val: number) {
-      console.log("Param 2 changed");
-    }
-    
-    change_delay_param_3(val: number) {
-      console.log("Param 3 changed");
+      this.delay.set({feedback: val});
     }
   }
 
-  let megaSynths: MegaSynth[] = [
-    new MegaSynth(0, 0, 0, "2", 'none'),
-    new MegaSynth(0, 0, 0, "3", 'none'),
-    new MegaSynth(0, 0, 0, "4", 'none')
-  ];
+  let megaSynthMap = new Map();
+  let megaSynth1 = new MegaSynth(0, 0, 0, "2", 'none');
+  let megaSynth2 = new MegaSynth(0, 0, 0, "3", 'none');
+  let megaSynth3 = new MegaSynth(0, 0, 0, "4", 'none');
+  megaSynthMap.set('2', megaSynth1);
+  megaSynthMap.set('3', megaSynth2);
+  megaSynthMap.set('4', megaSynth3);
 
-  let megaDelays: MegaDelay[] = [
-    new MegaDelay(0, 0, 0, "7"),
-  ];
+  let megaDelayMap = new Map();
+  let delay = new MegaDelay(0, 0, 0, "7");
+  megaDelayMap.set('7', delay);
 
   // Set default nodes
   const nodes = writable<Node[]>([
@@ -207,20 +202,20 @@
       type: 'colour',
     },
     {
-      id: megaSynths[0].id,
-      data: { slider1: megaSynths[0].slider1, slider2: megaSynths[0].slider2, slider3: megaSynths[0].slider3 },
+      id: '2',
+      data: { slider1: megaSynth1.slider1, slider2: megaSynth1.slider2, slider3: megaSynth1.slider3 },
       position: { x: -400, y: 200 },
       type: 'synth',
     },
     {
-      id: megaSynths[1].id,
-      data: { slider1: megaSynths[1].slider1, slider2: megaSynths[1].slider2, slider3: megaSynths[1].slider3 },
+      id: '3',
+      data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
       position: { x: -180, y: 0 },
       type: 'synth',
     },
     {
-      id: megaSynths[2].id,
-      data: { slider1: megaSynths[2].slider1, slider2: megaSynths[2].slider2, slider3: megaSynths[2].slider3 },
+      id: '4',
+      data: { slider1: megaSynth3.slider1, slider2: megaSynth3.slider2, slider3: megaSynth3.slider3 },
       position: { x: 100, y: -200 },
       type: 'synth',
     },
@@ -238,7 +233,7 @@
     },
     {
       id: '7',
-      data: {  },
+      data: { slider1: delay.slider1, slider2: delay.slider2 },
       position: { x: 60, y: 30 },
       type: 'delay',
     },
@@ -264,18 +259,21 @@
       // Then if our synth is already connected and playing then it will work
       // If we add another delay
 
+      // Update the routing when there is a change
+      updateAudioRouting(get(nodes), currentEdges);      
+    });
+
+    function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
       currentEdges.forEach(edge => {
-        const nodesList = get(nodes);
-        const patternNodeOut = nodesList.find(n => n.id === edge.source && n.type === 'pattern');
+        // Outies
+        const patternNodeOut = nodes.find(n => n.id === edge.source && n.type === 'pattern');
+        const synthNodeOut = nodes.find(n => n.id === edge.source && n.type === 'synth');
+        const delayNodeOut = nodes.find(n => n.id === edge.source && n.type === 'delay');
 
-        const synthNodeIn = nodesList.find(n => n.id === edge.target && n.type === 'synth');
-        const synthNodeOut = nodesList.find(n => n.id === edge.source && n.type === 'synth');
-        
-        const delayNodeIn = nodesList.find(n => n.id === edge.target && n.type === 'delay');
-        const delayNodeOut = nodesList.find(n => n.id === edge.source && n.type === 'delay');
-
-        const outNodeIn = nodesList.find(n => n.id === edge.target && n.type === 'audio-out');
-        
+        // Innies
+        const synthNodeIn = nodes.find(n => n.id === edge.target && n.type === 'synth');
+        const delayNodeIn = nodes.find(n => n.id === edge.target && n.type === 'delay');
+        const outNodeIn = nodes.find(n => n.id === edge.target && n.type === 'audio-out');        
 
         // TODO: Genericise all of this shite instead of checking for each possible node/edge combination - some kind of traversal?
         // The section below only works given a pattern, synth, delay and audio-out node
@@ -287,56 +285,53 @@
         // Synth to Audio-Out
         if (synthNodeOut && outNodeIn) {
           console.log(`Synth node (${synthNodeOut.id}) is connected to Audio-Out node (${outNodeIn.id})`);
-          megaSynths.forEach(megaSynth => {
-            if (synthNodeOut.id == megaSynth.id && !megaSynth.isConnected) {
-              console.log(`Enabling megasynth ${megaSynth.id}`)
-              megaSynth.enable();
-              // TODO: put toDest() in a function?
-              megaSynth.synth.toDestination();
-            }
-          });
+          let megaSynth = megaSynthMap.get(synthNodeOut.id)
+          if (!megaSynth.isConnected) {
+            console.log(`Enabling megasynth ${megaSynth.id}`)
+            megaSynth.enable();
+            // TODO: put toDest() in a function?
+            megaSynth.synth.toDestination();
+          }
         }
 
         // Delay to Audio-Out
         if (delayNodeOut && outNodeIn) {
-          if (delayNodeOut.id == megaDelays[0].id) {
-            console.log(`Delay node (${delayNodeOut.id}) is connected to Audio-Out node (${outNodeIn.id}) - calling toDest()`);
-            // TODO: put toDest() in a function?
-            megaDelays[0].delay.toDestination();
-          }
+          let delayNode = megaDelayMap.get(delayNodeOut.id);
+          console.log(`Delay node (${delayNodeOut.id}) is connected to Audio-Out node (${outNodeIn.id}) - calling toDest()`);
+          // TODO: put toDest() in a function?
+          delayNode.delay.toDestination();
         }
 
         // ===================== Call connect() for nodes not connected to output but connected to other nodes =====================
         // Pattern to synth
         if (patternNodeOut && synthNodeIn) {
           // A pattern is connected to a synth
-          console.log(`Synth node (${patternNodeOut.id}) is connected to Audio-Out node (${synthNodeIn.id})`);
-          megaSynths.forEach(megaSynth => {
-            if (synthNodeIn.id == megaSynth.id) {
-              console.log(`Enabling pattern ${megaSynth.id}`)
-              megaSynth.pattern = 'pattern1';
-              megaSynth.disable();
-              megaSynth.enable();
-            }
-          });
+          console.log(`Audio-out node (${patternNodeOut.id}) is connected to Synth node (${synthNodeIn.id})`);
+          let megaSynth = megaSynthMap.get(synthNodeIn.id)
+          console.log(megaSynth)
+          console.log(megaSynthMap);
+          if (synthNodeIn.id == megaSynth.id) {
+            console.log(`Enabling pattern ${megaSynth.id}`)
+            megaSynth.pattern = 'pattern1';
+            megaSynth.disable();
+            megaSynth.enable();
+          }
         }
 
         // Synth to delay
         if (synthNodeOut && delayNodeIn) {
           // Connect synth to delay
           console.log(`Synth node (${synthNodeOut.id}) is connected to Delay node (${delayNodeIn.id})`);
-          megaSynths.forEach(megaSynth => {
-            if (synthNodeOut.id == megaSynth.id) {
-              console.log(`Connecting delay to ${megaSynth.id}`)
-              // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
-              // Note: obviously looping over EVERYTHING is bad...
-              megaSynth.synth.connect(megaDelays[0].delay)
-              megaSynth.enable();
-            }
-          });
+          let megaSynth = megaSynthMap.get(synthNodeOut.id)
+          let delay = megaDelayMap.get(delayNodeIn.id)
+          console.log(`Connecting delay to ${megaSynth.id}`)
+          // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
+          // Note: obviously looping over EVERYTHING is bad...
+          megaSynth.synth.connect(delay.delay)
+          megaSynth.enable();
         }
       });
-    });
+    };
 </script>
 
 <div style:height="100vh">

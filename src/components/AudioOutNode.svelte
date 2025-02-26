@@ -9,7 +9,7 @@
     <!-- Add a target Handle to the left -->
     <Handle type="target" position={Position.Left} />
     <div>
-      Audio Out
+      <b>Audio Out</b>
     </div>
 
     <!-- No source (output) -->

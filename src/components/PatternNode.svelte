@@ -19,11 +19,11 @@
   <div class="sliders">
     <!-- No input (target) -->
     <div>
-      Pattern
+    <b>Pattern</b>
       <hr>
     </div>
     <div>
-      <i>Pattern: </i><strong>{$currentPattern}</strong>
+      <i>Pattern: </i>{$currentPattern}
     </div>
     <select
 		value={$currentPattern}
