@@ -14,6 +14,7 @@
   import AudioOutNode from './components/AudioOutNode.svelte';
   import PatternNode from './components/PatternNode.svelte';
   import DelayNode from './components/DelayNode.svelte';
+  import ReverbNode from './components/ReverbNode.svelte';
   import { onMount } from 'svelte';
   import * as Tone from 'tone';
 
@@ -31,6 +32,7 @@
     'audio-out': AudioOutNode,
     'pattern': PatternNode,
     'delay': DelayNode,
+    'reverb': ReverbNode,
   };
 
   const nodeDefaults = {
@@ -149,15 +151,12 @@
     // TODO: Rename these to actual slider types
     slider1: Writable<number>;
     slider2: Writable<number>;
-    slider3: Writable<number>;
     delay: Tone.FeedbackDelay;
     id: string;
 
     constructor(initParam1: number, initParam2: number, initParam3: number, id: string) {
       this.slider1 = writable(initParam1);
       this.slider2 = writable(initParam2);
-      this.slider3 = writable(initParam3);
-      // TODO: surely we don't need to track pitch, that's a bit overkill right? why does enable_synth run twice when you first connect the synth
       this.delay = new Tone.FeedbackDelay(0.5);
 
       this.slider1.subscribe((val) => {
@@ -181,6 +180,39 @@
     }
   }
 
+  class MegaReverb {
+    // TODO: Rename these to actual slider types
+    slider1: Writable<number>;
+    slider2: Writable<number>;
+    reverb: Tone.JCReverb;
+    id: string;
+
+    constructor(initParam1: number, initParam2: number, initParam3: number, id: string) {
+      this.slider1 = writable(initParam1);
+      this.slider2 = writable(initParam2);
+      this.reverb = new Tone.JCReverb(0.5);
+
+      this.slider1.subscribe((val) => {
+        this.change_reverb_param_1(val);
+      })
+
+      this.slider2.subscribe((val) => {
+        this.change_reverb_param_2(val);
+      })
+
+      this.id = id;
+    }
+
+    change_reverb_param_1(val: number) {
+      console.log("Param 1 changed");
+      this.reverb.set({roomSize: val});
+    }
+    
+    change_reverb_param_2(val: number) {
+      this.reverb.set({wet: val});
+    }
+  }
+
   let megaSynthMap = new Map();
   let megaSynth1 = new MegaSynth(0, 0, 0, "2", 'none');
   let megaSynth2 = new MegaSynth(0, 0, 0, "3", 'none');
@@ -192,6 +224,10 @@
   let megaDelayMap = new Map();
   let delay = new MegaDelay(0, 0, 0, "7");
   megaDelayMap.set('7', delay);
+
+  let megaReverbMap = new Map();
+  let reverb = new MegaReverb(0, 0, 0, "7");
+  megaReverbMap.set('8', reverb);
 
   // Set default nodes
   const nodes = writable<Node[]>([
@@ -237,6 +273,12 @@
       position: { x: 60, y: 30 },
       type: 'delay',
     },
+    {
+      id: '8',
+      data: { slider1: reverb.slider1, slider2: reverb.slider2 },
+      position: { x: 60, y: 30 },
+      type: 'reverb',
+    },
   ]);
 
   // Set default edges
@@ -269,10 +311,12 @@
         const patternNodeOut = nodes.find(n => n.id === edge.source && n.type === 'pattern');
         const synthNodeOut = nodes.find(n => n.id === edge.source && n.type === 'synth');
         const delayNodeOut = nodes.find(n => n.id === edge.source && n.type === 'delay');
+        const reverbNodeOut = nodes.find(n => n.id === edge.source && n.type === 'reverb');
 
         // Innies
         const synthNodeIn = nodes.find(n => n.id === edge.target && n.type === 'synth');
         const delayNodeIn = nodes.find(n => n.id === edge.target && n.type === 'delay');
+        const reverbNodeIn = nodes.find(n => n.id === edge.target && n.type === 'reverb');
         const outNodeIn = nodes.find(n => n.id === edge.target && n.type === 'audio-out');        
 
         // TODO: Genericise all of this shite instead of checking for each possible node/edge combination - some kind of traversal?
@@ -302,7 +346,16 @@
           delayNode.delay.toDestination();
         }
 
+        // Reverb to Audio-Out
+        if (reverbNodeOut && outNodeIn) {
+          let reverbNode = megaReverbMap.get(reverbNodeOut.id);
+          console.log(`Reverb node (${reverbNodeOut.id}) is connected to Audio-Out node (${outNodeIn.id}) - calling toDest()`);
+          // TODO: put toDest() in a function?
+          reverbNode.reverb.toDestination();
+        }
+
         // ===================== Call connect() for nodes not connected to output but connected to other nodes =====================
+        // SYNTH IN
         // Pattern to synth
         if (patternNodeOut && synthNodeIn) {
           // A pattern is connected to a synth
@@ -317,18 +370,56 @@
             megaSynth.enable();
           }
         }
-
+        
+        // SYNTH OUT
         // Synth to delay
         if (synthNodeOut && delayNodeIn) {
           // Connect synth to delay
           console.log(`Synth node (${synthNodeOut.id}) is connected to Delay node (${delayNodeIn.id})`);
           let megaSynth = megaSynthMap.get(synthNodeOut.id)
-          let delay = megaDelayMap.get(delayNodeIn.id)
+          let megaDelay = megaDelayMap.get(delayNodeIn.id)
           console.log(`Connecting delay to ${megaSynth.id}`)
           // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
           // Note: obviously looping over EVERYTHING is bad...
-          megaSynth.synth.connect(delay.delay)
+          megaSynth.synth.connect(megaDelay.delay)
           megaSynth.enable();
+        }
+        // Synth to reverb
+        if (synthNodeOut && reverbNodeIn) {
+          // Connect synth to reverb
+          console.log(`Synth node (${synthNodeOut.id}) is connected to Reverb node (${reverbNodeIn.id})`);
+          let megaSynth = megaSynthMap.get(synthNodeOut.id)
+          let megaReverb = megaReverbMap.get(reverbNodeIn.id)
+          console.log(`Connecting reverb to ${megaSynth.id}`)
+          // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
+          // Note: obviously looping over EVERYTHING is bad...
+          megaSynth.synth.connect(megaReverb.reverb)
+          // megaSynth.enable();
+        }
+
+        // EFFECTS
+        // Delay to reverb
+        if (delayNodeOut && reverbNodeIn) {
+          // Connect synth to reverb
+          console.log(`Delay node (${delayNodeOut.id}) is connected to Reverb node (${reverbNodeIn.id})`);
+          let megaDelay = megaDelayMap.get(delayNodeOut.id)
+          let megaReverb = megaReverbMap.get(reverbNodeIn.id)
+          console.log(`Connecting reverb to ${megaDelay.id}`)
+          // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
+          // Note: obviously looping over EVERYTHING is bad...
+          megaDelay.delay.connect(megaReverb.reverb)
+        }
+
+        // Reverb to delay
+        if (reverbNodeOut && delayNodeIn) {
+          // Connect synth to delay
+          console.log(`Reverb node (${reverbNodeOut.id}) is connected to Delay node (${delayNodeIn.id})`);
+          let megaReverb = megaReverbMap.get(reverbNodeOut.id)
+          let megaDelay = megaDelayMap.get(delayNodeIn.id)
+          console.log(`Connecting delay to ${megaReverb.id}`)
+          // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
+          // Note: obviously looping over EVERYTHING is bad...
+          megaReverb.reverb.connect(megaDelay.delay)
         }
       });
     };

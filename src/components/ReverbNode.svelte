@@ -20,11 +20,11 @@
     <Handle type="target" position={Position.Left} />
 
     <div>
-      <b>Delay</b>
+      <b>Reverb</b>
       <hr>
     </div>
     <div>
-      <i>Time: </i><strong>{$slider1}</strong>
+      <i>Room Size: </i><strong>{$slider1}</strong>
     </div>
     <input
       class="nodrag"
@@ -37,7 +37,7 @@
     />
 
     <div>
-      <i>Feedback: </i><strong>{$slider2}</strong>
+      <i>Wet: </i><strong>{$slider2}</strong>
     </div>
     <input
       class="nodrag"
