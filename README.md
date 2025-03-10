@@ -1,1 +1,27 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/yfSNuVM-)
+# Vite Svelte Flow Template
+
+This template creates a very basic [Svelte Flow](https://svelteflow.dev) app with [Vite](https://vite.dev).
+
+## Get it!
+
+```sh
+npx degit xyflow/vite-svelte-flow-template app-name
+```
+
+## Installation
+
+```sh
+npm install
+```
+
+## Development
+
+```sh
+npm run dev
+```
+
+## Build
+
+```sh
+npm run build
+```

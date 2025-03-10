@@ -1,0 +1,138 @@
+<script lang="ts">
+  import { Handle, Position, type NodeProps } from '@xyflow/svelte';
+  import type { Writable } from 'svelte/store';
+
+  type $Props = NodeProps;
+
+  export let data: { 
+    slider1: Writable<number>,
+    slider2: Writable<number>,
+    slider3: Writable<number>,
+  };
+
+  const { slider1, slider2, slider3 } = data;
+
+  // State for showing the popup
+  let showInfo = false;
+</script>
+
+<div class="sliders">
+  <!-- Info Button -->
+  <button class="info-button" on:click={() => showInfo = !showInfo}>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12" y2="8"></line>
+    </svg>
+  </button>
+
+  <!-- Pattern input -->
+  <Handle type="target" position={Position.Left} />
+
+  <div>
+    <b>Synthesizer</b>
+    <hr>
+  </div>
+  <div>
+    <i>Volume: </i><strong>{$slider1}db</strong>
+  </div>
+  <input
+    class="nodrag"
+    type="range"
+    min="-50"
+    max="50"
+    step="1"
+    on:input={(evt) => slider1.set(Number(evt.currentTarget?.value))}
+    value={$slider1}
+  />
+
+  <div>
+    <i>Pitch: </i><strong>{$slider2}</strong>
+  </div>
+  <input
+    class="nodrag"
+    type="range"
+    min="0"
+    max="100"
+    step="1"
+    on:input={(evt) => slider2.set(Number(evt.currentTarget?.value))}
+    value={$slider2}
+  />
+
+  <div>
+    <i>Shape: </i><strong>{$slider3}</strong>
+  </div>
+  <input
+    class="nodrag"
+    type="range"
+    min="0"
+    max="3"
+    step="1"
+    on:input={(evt) => slider3.set(Number(evt.currentTarget?.value))}
+    value={$slider3}
+  />
+
+  <!-- Output Handle -->
+  <Handle type="source" position={Position.Right} />
+</div>
+
+<!-- Info Popup -->
+{#if showInfo}
+  <div class="info-popup">
+      <div class="info-content">
+          <h3>Synthesizer</h3>
+          <p>This node generates sound.</p>
+          <button class="close-button" on:click={() => showInfo = false}>Close</button>
+      </div>
+  </div>
+{/if}
+
+<style>
+  .sliders {
+    padding: 1rem;
+    background: #fff;
+    border: var(--xy-node-border, var(--xy-node-border-default));
+    border-radius: var(--xy-node-border-radius, var(--xy-node-border-radius-default));
+    font-size: 0.7rem;
+  }
+
+  /* Info button */
+  .info-button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  /* Info popup */
+  .info-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+  }
+
+  /* Info content */
+  .info-content {
+    text-align: center;
+  }
+
+  /* Close button */
+  .close-button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    border: none;
+    background: red;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+</style>
