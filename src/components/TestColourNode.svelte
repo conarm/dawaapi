@@ -30,7 +30,7 @@
       value={$color}
     /> -->
 
-    <img src="https://images.newscientist.com/wp-content/uploads/2024/02/21143758/SEI_192557721.jpg" width="170" height="100" />
+    <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcG56dWpqa2kwN3Q2Mnd3M2R2dm55bnd2bnF2amNncjlnZDE1eTdqNSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VIKa3CjZDCoymNcBY5/giphy.gif" height="100" />
 
     <!-- Add a source Handle to the right -->
     <Handle type="source" position={Position.Right} />
