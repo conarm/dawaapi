@@ -25,7 +25,7 @@
 
   // Set node types
   // The 'type' property on Nodes in the node array should match any of these typenames (or just not specify 'type')
-  // TODO: Move these into another const
+  // TODO: Move these into a special const for access anywhere
   const nodeTypes = {
     'colour': TestColourNode,
     'synth': SynthesizerNode,
@@ -40,6 +40,7 @@
     targetPosition: Position.Left
   };
 
+  // TODO: Use the Tone.JS Note type for this or something? How to get an array of all notes...
   const pitches = [
     "C4",
     "D4",
@@ -240,19 +241,19 @@
     {
       id: '2',
       data: { slider1: megaSynth1.slider1, slider2: megaSynth1.slider2, slider3: megaSynth1.slider3 },
-      position: { x: -400, y: 200 },
+      position: { x: -600, y: 200 },
       type: 'synth',
     },
     {
       id: '3',
       data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
-      position: { x: -180, y: 0 },
+      position: { x: -400, y: 0 },
       type: 'synth',
     },
     {
       id: '4',
       data: { slider1: megaSynth3.slider1, slider2: megaSynth3.slider2, slider3: megaSynth3.slider3 },
-      position: { x: 100, y: -200 },
+      position: { x: -200, y: -200 },
       type: 'synth',
     },
     {
@@ -264,19 +265,19 @@
     {
       id: '6',
       data: { currentPattern: writable('pattern1') },
-      position: { x: -450, y: -130 },
+      position: { x: -600, y: -130 },
       type: 'pattern',
     },
     {
       id: '7',
       data: { slider1: delay.slider1, slider2: delay.slider2 },
-      position: { x: 60, y: 30 },
+      position: { x: -150, y: 30 },
       type: 'delay',
     },
     {
       id: '8',
       data: { slider1: reverb.slider1, slider2: reverb.slider2 },
-      position: { x: 60, y: 30 },
+      position: { x: 100, y: 30 },
       type: 'reverb',
     },
   ]);
@@ -306,6 +307,7 @@
     });
 
     function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
+      // TODO: Make sure things aren't happening twice!
       currentEdges.forEach(edge => {
         // Outies
         const patternNodeOut = nodes.find(n => n.id === edge.source && n.type === 'pattern');
@@ -319,7 +321,7 @@
         const reverbNodeIn = nodes.find(n => n.id === edge.target && n.type === 'reverb');
         const outNodeIn = nodes.find(n => n.id === edge.target && n.type === 'audio-out');        
 
-        // TODO: Genericise all of this shite instead of checking for each possible node/edge combination - some kind of traversal?
+        // TODO: Genericise all of this instead of checking for each possible node/edge combination - some kind of traversal?
         // The section below only works given a pattern, synth, delay and audio-out node
         // ================================= Call toDest() for nodes connected to output =================================
         // Are we connected to the Audio-Out node?
@@ -366,6 +368,7 @@
           if (synthNodeIn.id == megaSynth.id) {
             console.log(`Enabling pattern ${megaSynth.id}`)
             megaSynth.pattern = 'pattern1';
+            // TODO: it's a bit funny to have to enable/disable here, no? surely there's a new function that can be made
             megaSynth.disable();
             megaSynth.enable();
           }
@@ -423,12 +426,75 @@
         }
       });
     };
+
+    function addNode(label: any) {
+      nodes.update((n) => [
+        ...n,
+        createNode(label, String(n.length + 2))
+    ]);
+  }
+
+  function createNode(label: string, id: string): Node {
+    switch(label) {
+      // TODO: Have functions for node creation - don't hardcode it, this is jank
+      // Can we combine megaSynth creation and node list updates
+      // TODO: Also this is also only working for the synth...
+      case 'synth': {
+        let newMegaSynth = new MegaSynth(0, 0, 0, "2", 'none');
+        megaSynthMap.set(id, newMegaSynth);
+        return {
+          id: id,
+          type: label,
+          position: { x: 100, y: 100 },
+          data: { slider1: newMegaSynth.slider1, slider2: newMegaSynth.slider2, slider3: newMegaSynth.slider3 },
+        }
+      }
+      default: {
+        let newMegaSynth = new MegaSynth(0, 0, 0, "2", 'none');
+        megaSynthMap.set(id, newMegaSynth);
+        return {
+          id: id,
+          type: label,
+          position: { x: 100, y: 100 },
+          data: { slider1: newMegaSynth.slider1, slider2: newMegaSynth.slider2, slider3: newMegaSynth.slider3 },
+        }
+      }
+    }
+  }
 </script>
 
 <div style:height="100vh">
   <SvelteFlow {nodes} {edges} {nodeTypes} fitView>
-    <Controls />
+    <Controls />  
     <Background />
     <MiniMap />
   </SvelteFlow>
+
+  <!-- Make node-menu its own NodeMenu component -->
+  <div class="node-menu">
+    {#each Object.entries(nodeTypes) as [label]}
+      <button on:click={() => addNode(label)}>
+        {label}
+      </button>
+    {/each}
+  </div>
+  
+  <style>
+    .node-menu {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ddd;
+      box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    /* genericise this styling - how is this best done in svelte? */
+    button {
+      display: block;
+      margin-bottom: 5px;
+      padding: 5px;
+      cursor: pointer;
+    }
+  </style>
 </div>
