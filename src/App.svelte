@@ -9,12 +9,9 @@
     type Edge,
   } from '@xyflow/svelte';
   import * as Tone from 'tone';
-  import { defaultBPM, nodeTypes } from './consts';
+  import { defaultBPM, nodeTypes, defaultEdges } from './consts';
   import { onMount } from 'svelte';
-
-
   import '@xyflow/svelte/dist/style.css';
-
   import { MegaSynth } from './meganodes/MegaSynth';
   import { MegaDelay } from './meganodes/MegaDelay';
   import { MegaReverb } from './meganodes/MegaReverb';
@@ -35,7 +32,6 @@
   let reverb = new MegaReverb(0, 0, 0, "7");
   megaReverbMap.set('8', reverb);
 
-  // Set default nodes
   const nodes = writable<Node[]>([
     {
       id: '1',
@@ -87,9 +83,8 @@
     },
   ]);
 
-  // Set default edges
-  const edges = writable<Edge[]>([
-  ]);
+  // Set default edge
+  let edges = defaultEdges;
 
   onMount(async () => {
     Tone.getTransport().bpm.value = defaultBPM;
@@ -202,7 +197,7 @@
           // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
           // Note: obviously looping over EVERYTHING is bad...
           megaSynth.synth.connect(megaReverb.reverb)
-          // megaSynth.enable();
+          megaSynth.enable();
         }
 
         // EFFECTS

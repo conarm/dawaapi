@@ -6,10 +6,15 @@ import DelayNode from './components/DelayNode.svelte';
 import ReverbNode from './components/ReverbNode.svelte';
 import {
     Position,
+    type Edge,
+    type Node,
   } from '@xyflow/svelte';
+import type { OmniOscillatorType } from 'tone/build/esm/source/oscillator/OscillatorInterface';
+import { writable } from 'svelte/store';
 
 export const defaultBPM = 150;
-import type { OmniOscillatorType } from 'tone/build/esm/source/oscillator/OscillatorInterface';
+export const defaultEdges = writable<Edge[]>([
+]);
 
 // Set node types
 // The 'type' property on Nodes in the node array should match any of these typenames (or just not specify 'type')
