@@ -93,145 +93,78 @@
 
   // Watch for changes in edges to determine connections
   edges.subscribe((currentEdges) => {
-      // For each edge, check if it goes from a synth to an output
-      // If it does (i.e. source is a synth, output is an audio-out) then enable the synth if it isn't already
-      // We want to disable a synth if a synth is 'connected' but no edge goes from it to audio-out
-      // TODO: How . . .
-      // Notes:
-      // If a delay node is connected to a synth then we do synth.connect(delay)
-      // Then if our synth is already connected and playing then it will work
-      // If we add another delay
-
-      // Update the routing when there is a change
+      // Update the routing when there is a change to our edges
+      // TODO: Are we running this too much?
       updateAudioRouting(get(nodes), currentEdges);      
     });
 
     function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
-      // TODO: Make sure things aren't happening twice!
+      // Map of node IDs to actual mega objects
+      const nodeMap = new Map(nodes.map(node => [node.id, node]));
+
+      // Map of node types to their corresponding mega maps
+      // TODO: Can we put these maps into one or what?
+      const audioNodeMaps = new Map();
+      audioNodeMaps.set("synth", megaSynthMap)
+      audioNodeMaps.set("delay", megaDelayMap)
+      audioNodeMaps.set("reverb", megaReverbMap)
+
+      function getMegaObject(node: Node) {
+        return audioNodeMaps.get(node.type)?.get(node.id);
+      }
+
+      function connectAudioNodes(sourceNode: Node, targetNode: Node) {
+          // Get the associate mega (Tone) object for the source and target
+          // Some do not have a mega object and don't need it, e.g. audio-out
+          // For now pattern has no mega object either
+          const sourceMega = getMegaObject(sourceNode);
+          const targetMega = getMegaObject(targetNode);
+
+          if ((!sourceMega || !targetMega) && targetNode.type != "audio-out" && sourceNode.type != "pattern") return;
+
+          console.log(`Connecting ${sourceNode.type} (${sourceNode.id}) to ${targetNode.type} (${targetNode.id})`);
+
+          // Connecting to the output
+          if (targetNode.type === "audio-out") {
+              if (sourceNode.type === "synth") {
+                  if (!sourceMega.isConnected) {
+                      console.log(`Enabling synth ${sourceMega.id}`);
+                      sourceMega.enable();
+                      sourceMega.synth.toDestination();
+                  }
+              } else if (sourceNode.type === "delay") {
+                  sourceMega.delay.toDestination();
+              } else if (sourceNode.type === "reverb") {
+                  sourceMega.reverb.toDestination();
+              }
+
+          // Connecting to anything else
+          } else {
+              if (sourceNode.type === "synth" && targetNode.type === "delay") {
+                  sourceMega.synth.connect(targetMega.delay);
+              } else if (sourceNode.type === "synth" && targetNode.type === "reverb") {
+                  sourceMega.synth.connect(targetMega.reverb);
+              } else if (sourceNode.type === "delay" && targetNode.type === "reverb") {
+                  sourceMega.delay.connect(targetMega.reverb);
+              } else if (sourceNode.type === "reverb" && targetNode.type === "delay") {
+                  sourceMega.reverb.connect(targetMega.delay);
+              } else if (sourceNode.type === "pattern" && targetNode.type === "synth") {
+                targetMega.pattern = 'pattern1';
+                targetMega.disable()
+                targetMega.enable()
+              }
+          }
+      }
+
+      // For each edge, connect the source to the target
       currentEdges.forEach(edge => {
-        // Outies
-        const patternNodeOut = nodes.find(n => n.id === edge.source && n.type === 'pattern');
-        const synthNodeOut = nodes.find(n => n.id === edge.source && n.type === 'synth');
-        const delayNodeOut = nodes.find(n => n.id === edge.source && n.type === 'delay');
-        const reverbNodeOut = nodes.find(n => n.id === edge.source && n.type === 'reverb');
+          const sourceNode = nodeMap.get(edge.source);
+          const targetNode = nodeMap.get(edge.target);
 
-        // Innies
-        const synthNodeIn = nodes.find(n => n.id === edge.target && n.type === 'synth');
-        const delayNodeIn = nodes.find(n => n.id === edge.target && n.type === 'delay');
-        const reverbNodeIn = nodes.find(n => n.id === edge.target && n.type === 'reverb');
-        const outNodeIn = nodes.find(n => n.id === edge.target && n.type === 'audio-out');        
-
-        // TODO: Genericise all of this instead of checking for each possible node/edge combination - some kind of traversal?
-        // The section below only works given a pattern, synth, delay and audio-out node
-        // ================================= Call toDest() for nodes connected to output =================================
-        // Are we connected to the Audio-Out node?
-        // If we are, we really want to be calling toDestination on whatever is right before the output
-        // This is provided we have logic setup to call connect() on all the prior nodes in the chain
-        
-        // Synth to Audio-Out
-        if (synthNodeOut && outNodeIn) {
-          console.log(`Synth node (${synthNodeOut.id}) is connected to Audio-Out node (${outNodeIn.id})`);
-          let megaSynth = megaSynthMap.get(synthNodeOut.id)
-          if (!megaSynth.isConnected) {
-            console.log(`Enabling megasynth ${megaSynth.id}`)
-            megaSynth.enable();
-            // TODO: put toDest() in a function?
-            megaSynth.synth.toDestination();
+          if (sourceNode && targetNode) {
+            connectAudioNodes(sourceNode, targetNode);
           }
-        }
-
-        // Delay to Audio-Out
-        if (delayNodeOut && outNodeIn) {
-          let delayNode = megaDelayMap.get(delayNodeOut.id);
-          console.log(`Delay node (${delayNodeOut.id}) is connected to Audio-Out node (${outNodeIn.id}) - calling toDest()`);
-          // TODO: put toDest() in a function?
-          delayNode.delay.toDestination();
-        }
-
-        // Reverb to Audio-Out
-        if (reverbNodeOut && outNodeIn) {
-          let reverbNode = megaReverbMap.get(reverbNodeOut.id);
-          console.log(`Reverb node (${reverbNodeOut.id}) is connected to Audio-Out node (${outNodeIn.id}) - calling toDest()`);
-          // TODO: put toDest() in a function?
-          reverbNode.reverb.toDestination();
-        }
-
-        // ===================== Call connect() for nodes not connected to output but connected to other nodes =====================
-        // SYNTH IN
-        // Pattern to synth
-        if (patternNodeOut && synthNodeIn) {
-          // A pattern is connected to a synth
-          console.log(`Audio-out node (${patternNodeOut.id}) is connected to Synth node (${synthNodeIn.id})`);
-          let megaSynth = megaSynthMap.get(synthNodeIn.id)
-          console.log(megaSynth)
-          console.log(megaSynthMap);
-          if (synthNodeIn.id == megaSynth.id) {
-            console.log(`Enabling pattern ${megaSynth.id}`)
-            megaSynth.pattern = 'pattern1';
-            // TODO: it's a bit funny to have to enable/disable here, no? surely there's a new function that can be made
-            megaSynth.disable();
-            megaSynth.enable();
-          }
-        }
-        
-        // SYNTH OUT
-        // Synth to delay
-        if (synthNodeOut && delayNodeIn) {
-          // Connect synth to delay
-          console.log(`Synth node (${synthNodeOut.id}) is connected to Delay node (${delayNodeIn.id})`);
-          let megaSynth = megaSynthMap.get(synthNodeOut.id)
-          let megaDelay = megaDelayMap.get(delayNodeIn.id)
-          console.log(`Connecting delay to ${megaSynth.id}`)
-          // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
-          // Note: obviously looping over EVERYTHING is bad...
-          megaSynth.synth.connect(megaDelay.delay)
-          megaSynth.enable();
-        }
-        // Synth to reverb
-        if (synthNodeOut && reverbNodeIn) {
-          // Connect synth to reverb
-          console.log(`Synth node (${synthNodeOut.id}) is connected to Reverb node (${reverbNodeIn.id})`);
-          let megaSynth = megaSynthMap.get(synthNodeOut.id)
-          let megaReverb = megaReverbMap.get(reverbNodeIn.id)
-          console.log(`Connecting reverb to ${megaSynth.id}`)
-          // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
-          // Note: obviously looping over EVERYTHING is bad...
-          megaSynth.synth.connect(megaReverb.reverb)
-          megaSynth.enable();
-        }
-
-        // EFFECTS
-        // Delay to reverb
-        if (delayNodeOut && reverbNodeIn) {
-          // Connect synth to reverb
-          console.log(`Delay node (${delayNodeOut.id}) is connected to Reverb node (${reverbNodeIn.id})`);
-          let megaDelay = megaDelayMap.get(delayNodeOut.id)
-          let megaReverb = megaReverbMap.get(reverbNodeIn.id)
-          console.log(`Connecting reverb to ${megaDelay.id}`)
-          // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
-          // Note: obviously looping over EVERYTHING is bad...
-          megaDelay.delay.connect(megaReverb.reverb)
-        }
-
-        // Reverb to delay
-        if (reverbNodeOut && delayNodeIn) {
-          // Connect synth to delay
-          console.log(`Reverb node (${reverbNodeOut.id}) is connected to Delay node (${delayNodeIn.id})`);
-          let megaReverb = megaReverbMap.get(reverbNodeOut.id)
-          let megaDelay = megaDelayMap.get(delayNodeIn.id)
-          console.log(`Connecting delay to ${megaReverb.id}`)
-          // TODO: the delay specification is hardcoded here - we need some way of doing it dynamically
-          // Note: obviously looping over EVERYTHING is bad...
-          megaReverb.reverb.connect(megaDelay.delay)
-        }
       });
-    };
-
-    function addNode(label: any) {
-      nodes.update((n) => [
-        ...n,
-        createNode(label, String(n.length + 2))
-    ]);
   }
 
   function createNode(label: string, id: string): Node {
