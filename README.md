@@ -1,12 +1,8 @@
-# Vite Svelte Flow Template
+# Individual Project - Web Audio API DAW
 
-This template creates a very basic [Svelte Flow](https://svelteflow.dev) app with [Vite](https://vite.dev).
+## Introduction
 
-## Get it!
-
-```sh
-npx degit xyflow/vite-svelte-flow-template app-name
-```
+A node-based piece of audio synthesis software, as a layer on top of, and making use of, the Web Audio API. It aims to provide an accessible DAW as a PWA, allowing users to access the application using a browser from anywhere, without an installation overhead.
 
 ## Installation
 
