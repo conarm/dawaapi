@@ -167,15 +167,42 @@
     switch(label) {
       // TODO: Have functions for node creation - don't hardcode it, this is jank
       // Can we combine megaSynth creation and node list updates
-      // TODO: Also this is also only working for the synth...
       case 'synth': {
-        let newMegaSynth = new MegaSynth(0, 0, 0, "2", 'none', false);
-        megaSynthMap.set(id, newMegaSynth);
+        let newMegaSynth = new MegaSynth(0, 0, 0, id, 'none', false);
+        megaMap.set(id, newMegaSynth);
         return {
           id: id,
           type: label,
           position: { x: 100, y: 100 },
           data: { slider1: newMegaSynth.slider1, slider2: newMegaSynth.slider2, slider3: newMegaSynth.slider3 },
+        }
+      }
+      case 'delay': {
+        let newMegaDelay = new MegaDelay(0, 0, 0, id);
+        megaMap.set(id, newMegaDelay);
+        return {
+          id: id,
+          type: label,
+          position: { x: 100, y: 100 },
+          data: { slider1: newMegaDelay.slider1, slider2: newMegaDelay.slider2 },
+        }
+      }
+      case 'reverb': {
+        let newMegaDelay = new MegaReverb(0, 0, 0, id);
+        megaMap.set(id, newMegaDelay);
+        return {
+          id: id,
+          type: label,
+          position: { x: 100, y: 100 },
+          data: { slider1: newMegaDelay.slider1, slider2: newMegaDelay.slider2 },
+        }
+      }
+      case 'pattern': {
+        return {
+          id: id,
+          data: { currentPattern: writable('pattern1') },
+          position: { x: -600, y: -130 },
+          type: 'pattern',
         }
       }
       default: {
@@ -202,9 +229,11 @@
   <!-- Make node-menu its own NodeMenu component -->
   <div class="node-menu">
     {#each Object.entries(nodeTypes) as [label]}
-      <button on:click={() => addNode(label)}>
-        {label}
-      </button>
+      {#if label != 'audio-out'}
+        <button on:click={() => addNode(label)}>
+          {label}
+        </button>
+      {/if}
     {/each}
   </div>
   
