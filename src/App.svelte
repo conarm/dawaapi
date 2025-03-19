@@ -167,7 +167,7 @@
       // Can we combine megaSynth creation and node list updates
       // TODO: Also this is also only working for the synth...
       case 'synth': {
-        let newMegaSynth = new MegaSynth(0, 0, 0, "2", 'none');
+        let newMegaSynth = new MegaSynth(0, 0, 0, "2", 'none', false);
         megaSynthMap.set(id, newMegaSynth);
         return {
           id: id,
@@ -177,7 +177,7 @@
         }
       }
       default: {
-        let newMegaSynth = new MegaSynth(0, 0, 0, "2", 'none');
+        let newMegaSynth = new MegaSynth(0, 0, 0, "2", 'none', false);
         megaSynthMap.set(id, newMegaSynth);
         return {
           id: id,
