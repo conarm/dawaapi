@@ -3,35 +3,34 @@ import { MegaNode } from './MegaNode';
 import { writable, type Writable } from 'svelte/store';
 
 export class MegaPhaser extends MegaNode {
-    // TODO: Rename these to actual slider types
-    slider1: Writable<number>;
-    slider2: Writable<number>;
-    slider3: Writable<number>;
+    sliderFrequency: Writable<number>;
+    sliderOctaves: Writable<number>;
+    sliderBaseFrequency: Writable<number>;
     phaser: Tone.Phaser;
     id: string;
 
     constructor(initParam1: number, initParam2: number, initParam3: number, id: string) {
       super(id);
 
-      this.slider1 = writable(initParam1);
-      this.slider2 = writable(initParam2);
-      this.slider3 = writable(initParam3);
+      this.sliderFrequency = writable(initParam1);
+      this.sliderOctaves = writable(initParam2);
+      this.sliderBaseFrequency = writable(initParam3);
       this.phaser = new Tone.Phaser({
         frequency: 15,
         octaves: 5,
         baseFrequency: 1000
     });
 
-      this.slider1.subscribe((val) => {
-        this.change_param_1(val);
+      this.sliderFrequency.subscribe((val) => {
+        this.change_frequency(val);
       })
 
-      this.slider2.subscribe((val) => {
-        this.change_param_2(val);
+      this.sliderOctaves.subscribe((val) => {
+        this.change_octaves(val);
       })
       
-      this.slider3.subscribe((val) => {
-        this.change_param_3(val);
+      this.sliderBaseFrequency.subscribe((val) => {
+        this.change_base_frequency(val);
       })
 
       this.id = id;
@@ -41,14 +40,14 @@ export class MegaPhaser extends MegaNode {
         return this.phaser;
     }
 
-    change_param_1(val: number) {
+    change_frequency(val: number) {
       this.phaser.set({frequency: val});
     }
     
-    change_param_2(val: number) {
+    change_octaves(val: number) {
       this.phaser.set({octaves: val});
     }
-    change_param_3(val: number) {
+    change_base_frequency(val: number) {
         this.phaser.set({baseFrequency: val});
       }
   }
