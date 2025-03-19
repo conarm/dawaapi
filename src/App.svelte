@@ -16,21 +16,20 @@
   import { MegaDelay } from './meganodes/MegaDelay';
   import { MegaReverb } from './meganodes/MegaReverb';
 
+  let megaMap = new Map()
   let megaSynthMap = new Map();
   let megaSynth1 = new MegaSynth(0, 0, 0, "2", 'none', false);
   let megaSynth2 = new MegaSynth(0, 0, 0, "3", 'none', false);
   let megaSynth3 = new MegaSynth(0, 0, 0, "4", 'none', false);
-  megaSynthMap.set('2', megaSynth1);
-  megaSynthMap.set('3', megaSynth2);
-  megaSynthMap.set('4', megaSynth3);
+  megaMap.set('2', megaSynth1);
+  megaMap.set('3', megaSynth2);
+  megaMap.set('4', megaSynth3);
 
-  let megaDelayMap = new Map();
   let delay = new MegaDelay(0, 0, 0, "7");
-  megaDelayMap.set('7', delay);
+  megaMap.set('7', delay);
 
-  let megaReverbMap = new Map();
   let reverb = new MegaReverb(0, 0, 0, "7");
-  megaReverbMap.set('8', reverb);
+  megaMap.set('8', reverb);
 
   const nodes = writable<Node[]>([
     {
@@ -104,13 +103,9 @@
 
       // Map of node types to their corresponding mega maps
       // TODO: Can we put these maps into one or what?
-      const audioNodeMaps = new Map();
-      audioNodeMaps.set("synth", megaSynthMap)
-      audioNodeMaps.set("delay", megaDelayMap)
-      audioNodeMaps.set("reverb", megaReverbMap)
 
       function getMegaObject(node: Node) {
-        return audioNodeMaps.get(node.type)?.get(node.id);
+        return megaMap.get(node.id);
       }
 
       function connectAudioNodes(sourceNode: Node, targetNode: Node) {
@@ -159,6 +154,13 @@
             connectAudioNodes(sourceNode, targetNode);
           }
       });
+  }
+
+  function addNode(label: any) {
+    nodes.update((n) => [
+      ...n,
+      createNode(label, String(n.length + 2))
+    ]);
   }
 
   function createNode(label: string, id: string): Node {
