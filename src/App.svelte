@@ -15,6 +15,7 @@
   import { MegaSynth } from './meganodes/MegaSynth';
   import { MegaDelay } from './meganodes/MegaDelay';
   import { MegaReverb } from './meganodes/MegaReverb';
+  import { MegaPhaser } from './meganodes/MegaPhaser';
 
   let megaMap = new Map()
   let megaSynthMap = new Map();
@@ -32,54 +33,54 @@
   megaMap.set('8', reverb);
 
   const nodes = writable<Node[]>([
+    // {
+    //   id: '1',
+    //   data: { color: writable('#ff4000') }, 
+    //   position: { x: 200, y: 300 },
+    //   type: 'colour',
+    // },
+    // {
+    //   id: '2',
+    //   data: { slider1: megaSynth1.slider1, slider2: megaSynth1.slider2, slider3: megaSynth1.slider3 },
+    //   position: { x: -600, y: 200 },
+    //   type: 'synth',
+    // },
+    // {
+    //   id: '3',
+    //   data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
+    //   position: { x: -400, y: 0 },
+    //   type: 'synth',
+    // },
+    // {
+    //   id: '4',
+    //   data: { slider1: megaSynth3.slider1, slider2: megaSynth3.slider2, slider3: megaSynth3.slider3 },
+    //   position: { x: -200, y: -200 },
+    //   type: 'synth',
+    // },
     {
       id: '1',
-      data: { color: writable('#ff4000') }, 
-      position: { x: 200, y: 300 },
-      type: 'colour',
-    },
-    {
-      id: '2',
-      data: { slider1: megaSynth1.slider1, slider2: megaSynth1.slider2, slider3: megaSynth1.slider3 },
-      position: { x: -600, y: 200 },
-      type: 'synth',
-    },
-    {
-      id: '3',
-      data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
-      position: { x: -400, y: 0 },
-      type: 'synth',
-    },
-    {
-      id: '4',
-      data: { slider1: megaSynth3.slider1, slider2: megaSynth3.slider2, slider3: megaSynth3.slider3 },
-      position: { x: -200, y: -200 },
-      type: 'synth',
-    },
-    {
-      id: '5',
       data: {  },
       position: { x: 350, y: 230 },
       type: 'audio-out',
     },
-    {
-      id: '6',
-      data: { currentPattern: writable('pattern1') },
-      position: { x: -600, y: -130 },
-      type: 'pattern',
-    },
-    {
-      id: '7',
-      data: { slider1: delay.slider1, slider2: delay.slider2 },
-      position: { x: -150, y: 30 },
-      type: 'delay',
-    },
-    {
-      id: '8',
-      data: { slider1: reverb.slider1, slider2: reverb.slider2 },
-      position: { x: 100, y: 30 },
-      type: 'reverb',
-    },
+    // {
+    //   id: '6',
+    //   data: { currentPattern: writable('pattern1') },
+    //   position: { x: -600, y: -130 },
+    //   type: 'pattern',
+    // },
+    // {
+    //   id: '7',
+    //   data: { slider1: delay.slider1, slider2: delay.slider2 },
+    //   position: { x: -150, y: 30 },
+    //   type: 'delay',
+    // },
+    // {
+    //   id: '8',
+    //   data: { slider1: reverb.slider1, slider2: reverb.slider2 },
+    //   position: { x: 100, y: 30 },
+    //   type: 'reverb',
+    // },
   ]);
 
   // Set default edge
@@ -131,6 +132,8 @@
                   sourceMega.delay.toDestination();
               } else if (sourceNode.type === "reverb") {
                   sourceMega.reverb.toDestination();
+              } else if (sourceNode.type === "phaser") {
+                  sourceMega.phaser.toDestination();
               }
 
           // Connecting to anything else
@@ -197,11 +200,21 @@
           data: { slider1: newMegaDelay.slider1, slider2: newMegaDelay.slider2 },
         }
       }
+      case 'phaser': {
+        let newMegaPhaser = new MegaPhaser(15, 5, 1000, id);
+        megaMap.set(id, newMegaPhaser);
+        return {
+          id: id,
+          type: label,
+          position: { x: 100, y: 100 },
+          data: { slider1: newMegaPhaser.slider1, slider2: newMegaPhaser.slider2, slider3: newMegaPhaser.slider3 },
+        }
+      }
       case 'pattern': {
         return {
           id: id,
           data: { currentPattern: writable('pattern1') },
-          position: { x: -600, y: -130 },
+          position: {  x: 100, y: 100 },
           type: 'pattern',
         }
       }

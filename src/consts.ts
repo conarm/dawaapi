@@ -11,6 +11,7 @@ import {
   } from '@xyflow/svelte';
 import type { OmniOscillatorType } from 'tone/build/esm/source/oscillator/OscillatorInterface';
 import { writable } from 'svelte/store';
+import PhaserNode from './components/PhaserNode.svelte';
 
 export const defaultBPM = 150;
 export const defaultEdges = writable<Edge[]>([
@@ -26,6 +27,7 @@ export const nodeTypes = {
   'pattern': PatternNode,
   'delay': DelayNode,
   'reverb': ReverbNode,
+  'phaser': PhaserNode,
 };
 
 export const nodeDefaults = {
