@@ -17,9 +17,9 @@
   import { MegaReverb } from './meganodes/MegaReverb';
 
   let megaSynthMap = new Map();
-  let megaSynth1 = new MegaSynth(0, 0, 0, "2", 'none');
-  let megaSynth2 = new MegaSynth(0, 0, 0, "3", 'none');
-  let megaSynth3 = new MegaSynth(0, 0, 0, "4", 'none');
+  let megaSynth1 = new MegaSynth(0, 0, 0, "2", 'none', false);
+  let megaSynth2 = new MegaSynth(0, 0, 0, "3", 'none', false);
+  let megaSynth3 = new MegaSynth(0, 0, 0, "4", 'none', false);
   megaSynthMap.set('2', megaSynth1);
   megaSynthMap.set('3', megaSynth2);
   megaSynthMap.set('4', megaSynth3);
@@ -140,18 +140,12 @@
 
           // Connecting to anything else
           } else {
-              if (sourceNode.type === "synth" && targetNode.type === "delay") {
-                  sourceMega.synth.connect(targetMega.delay);
-              } else if (sourceNode.type === "synth" && targetNode.type === "reverb") {
-                  sourceMega.synth.connect(targetMega.reverb);
-              } else if (sourceNode.type === "delay" && targetNode.type === "reverb") {
-                  sourceMega.delay.connect(targetMega.reverb);
-              } else if (sourceNode.type === "reverb" && targetNode.type === "delay") {
-                  sourceMega.reverb.connect(targetMega.delay);
-              } else if (sourceNode.type === "pattern" && targetNode.type === "synth") {
+              if (sourceNode.type === "pattern" && targetNode.type === "synth") {
                 targetMega.pattern = 'pattern1';
                 targetMega.disable()
                 targetMega.enable()
+              } else {
+                sourceMega.connect(targetMega)
               }
           }
       }

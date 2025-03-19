@@ -1,7 +1,8 @@
 import { writable, type Writable } from 'svelte/store';
 import * as Tone from 'tone';
+import { MegaNode } from './MegaNode';
 
-export class MegaDelay {
+export class MegaDelay extends MegaNode {
     // TODO: Rename these to actual slider types
     slider1: Writable<number>;
     slider2: Writable<number>;
@@ -9,6 +10,8 @@ export class MegaDelay {
     id: string;
 
     constructor(initParam1: number, initParam2: number, initParam3: number, id: string) {
+      super(id)
+
       this.slider1 = writable(initParam1);
       this.slider2 = writable(initParam2);
       this.delay = new Tone.FeedbackDelay(0.5);
@@ -22,6 +25,10 @@ export class MegaDelay {
       })
 
       this.id = id;
+    }
+
+    getNode(): Tone.FeedbackDelay {
+        return this.delay;
     }
 
     change_delay_param_1(val: number) {
