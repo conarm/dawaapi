@@ -24,7 +24,7 @@ npm run build
 
 ## User Guide
 
-### Introduction
+### Usage
 
 A range of nodes can be added to the canvas. These nodes can either generate an audio signal or apply effects to an audio signal. Nodes can be added by left-clicking the appropriate buttons on the node menu.
 
