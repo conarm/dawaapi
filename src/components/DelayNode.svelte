@@ -31,7 +31,7 @@
       <hr>
     </div>
     <div>
-      <i>Time: </i><strong>{$slider1}</strong>
+      <i>Time: </i><strong>{$slider1}s</strong>
     </div>
     <input
       class="nodrag"

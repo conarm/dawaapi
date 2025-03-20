@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Handle, Position, type NodeProps } from '@xyflow/svelte';
   import type { Writable } from 'svelte/store';
+    import { pitches, shapes } from '../consts';
 
   export let data: { 
     slider1: Writable<number>,
@@ -45,20 +46,20 @@
   />
 
   <div>
-    <i>Pitch: </i><strong>{$slider2}</strong>
+    <i>Pitch: </i><strong>{pitches[$slider2]}</strong>
   </div>
   <input
     class="nodrag"
     type="range"
     min="0"
-    max="100"
+    max="62"
     step="1"
     on:input={(evt) => slider2.set(Number(evt.currentTarget?.value))}
     value={$slider2}
   />
 
   <div>
-    <i>Shape: </i><strong>{$slider3}</strong>
+    <i>Shape: </i><strong>{shapes[$slider3].toString()}</strong>
   </div>
   <input
     class="nodrag"

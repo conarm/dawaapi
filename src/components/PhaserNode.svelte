@@ -32,14 +32,14 @@
       <hr>
     </div>
     <div>
-      <i>Frequency: </i><strong>{$slider1}</strong>
+      <i>Frequency: </i><strong>{$slider1}Hz</strong>
     </div>
     <input
       class="nodrag"
       type="range"
       min="0"
-      max="1000"
-      step="1"
+      max="10"
+      step="0.1"
       on:input={(evt) => slider1.set(Number(evt.currentTarget?.value))}
       value={$slider1}
     />
@@ -58,14 +58,14 @@
     />
 
     <div>
-      <i>Base frequency: </i><strong>{$slider3}</strong>
+      <i>Base frequency: </i><strong>{$slider3}Hz</strong>
     </div>
     <input
       class="nodrag"
       type="range"
-      min="0"
-      max="1000"
-      step="1"
+      min="100"
+      max="3000"
+      step="50"
       on:input={(evt) => slider3.set(Number(evt.currentTarget?.value))}
       value={$slider3}
     />
