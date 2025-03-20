@@ -5,7 +5,7 @@ import { MegaNode } from './MegaNode';
 export class MegaReverb extends MegaNode {
     roomSize: Writable<number>;
     wet: Writable<number>;
-    reverbObject: Tone.JCReverb;
+    private reverbObject: Tone.JCReverb;
 
     constructor(id: string, initRoomSize: number, initWet: number) {
       super(id);
@@ -29,11 +29,11 @@ export class MegaReverb extends MegaNode {
         return this.reverbObject;
     }
 
-    change_room_size(roomSize: number) {
+    change_room_size(roomSize: number): void {
       this.reverbObject.set({roomSize: roomSize});
     }
     
-    change_wet(wet: number) {
+    change_wet(wet: number): void {
       this.reverbObject.set({wet: wet});
     }
   }

@@ -6,7 +6,7 @@ export class MegaPhaser extends MegaNode {
     frequency: Writable<number>;
     octaves: Writable<number>;
     baseFrequency: Writable<number>;
-    phaserObject: Tone.Phaser;
+    private phaserObject: Tone.Phaser;
 
     constructor(id: string, initFrequency: number, initOctaves: number, initBaseFrequency: number) {
       super(id);
@@ -37,14 +37,14 @@ export class MegaPhaser extends MegaNode {
         return this.phaserObject;
     }
 
-    change_frequency(val: number) {
+    change_frequency(val: number): void {
       this.phaserObject.set({frequency: val});
     }
     
-    change_octaves(val: number) {
+    change_octaves(val: number): void {
       this.phaserObject.set({octaves: val});
     }
-    change_base_frequency(val: number) {
+    change_base_frequency(val: number): void {
         this.phaserObject.set({baseFrequency: val});
       }
   }

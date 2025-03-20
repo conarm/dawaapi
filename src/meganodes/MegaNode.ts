@@ -14,4 +14,8 @@ export abstract class MegaNode {
     connect(megaNode: MegaNode): void {
         this.getNode().connect(megaNode.getNode());
     }
+
+    connectToOutput(): void {
+        this.getNode().toDestination();
+    }
 }

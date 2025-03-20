@@ -10,7 +10,7 @@ export class MegaSynth extends MegaNode {
     volume: Writable<number>;
     pitch: Writable<number>;
     shape: Writable<number>;
-    synthObject: Tone.Synth;
+    private synthObject: Tone.Synth;
     pattern: string;
     part: Tone.Part;
 
@@ -51,7 +51,7 @@ export class MegaSynth extends MegaNode {
         this.enable();
     }
 
-    enable() {
+    enable(): void {
         console.log("Synth enabled - triggering attack");
         this.isConnected = true;
         if (this.pattern == 'pattern1') {
@@ -63,24 +63,23 @@ export class MegaSynth extends MegaNode {
         Tone.getTransport().start();
     }
 
-    disable() {
+    disable(): void {
         console.log("Synth disabled - triggering release");
         this.isConnected = false;
         this.synthObject.triggerRelease(); // Stop the note
-        // TODO: keep this here?
         this.synthObject.disconnect;
     }
 
-    change_volume(volume: number) {
+    change_volume(volume: number): void {
         this.synthObject.set({
             volume: volume
         })
     }
     
-    change_pitch(pitch: number) {
+    change_pitch(pitch: number): void {
         this.synthObject.setNote(pitches[pitch]);    }
     
-    change_shape(shape: number) {
+    change_shape(shape: number): void {
         this.synthObject.oscillator.type = shapes[shape];
     }
 }

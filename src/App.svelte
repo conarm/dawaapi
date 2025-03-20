@@ -99,12 +99,8 @@
     });
 
     function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
-      // Map of node IDs to actual mega objects
+      // Allow node component indexing by ID
       const nodeMap = new Map(nodes.map(node => [node.id, node]));
-
-      // Map of node types to their corresponding mega maps
-      // TODO: Can we put these maps into one or what?
-
       function getMegaObject(node: Node) {
         return megaMap.get(node.id);
       }
@@ -118,23 +114,16 @@
 
           if ((!sourceMega || !targetMega) && targetNode.type != "audio-out" && sourceNode.type != "pattern") return;
 
-          console.log(`Connecting ${sourceNode.type} (${sourceNode.id}) to ${targetNode.type} (${targetNode.id})`);
-
           // Connecting to the output
-          // TODO: Make functions for toDest()
           if (targetNode.type === "audio-out") {
               if (sourceNode.type === "synth") {
                   if (!sourceMega.isConnected) {
                       console.log(`Enabling synth ${sourceMega.id}`);
                       sourceMega.enable();
-                      sourceMega.synthObject.toDestination();
+                      sourceMega.connectToOutput();
                   }
-              } else if (sourceNode.type === "delay") {
-                  sourceMega.delayObject.toDestination();
-              } else if (sourceNode.type === "reverb") {
-                  sourceMega.reverbObject.toDestination();
-              } else if (sourceNode.type === "phaser") {
-                  sourceMega.phaserObject.toDestination();
+              } else {
+                sourceMega.connectToOutput();
               }
 
           // Connecting to anything else
@@ -182,7 +171,7 @@
         }
       }
       case 'delay': {
-        let newMegaDelay = new MegaDelay(id, 0, 0, 0);
+        let newMegaDelay = new MegaDelay(id, 0, 0);
         megaMap.set(id, newMegaDelay);
         return {
           id: id,
@@ -261,7 +250,7 @@
       border: 1px solid #ddd;
       box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
     }
-    /* genericise this styling - how is this best done in svelte? */
+    /* TODO: Genericise this styling - how is this best done in svelte? */
     button {
       display: block;
       margin-bottom: 5px;

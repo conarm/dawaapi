@@ -5,7 +5,7 @@ import { MegaNode } from './MegaNode';
 export class MegaDelay extends MegaNode {
     delayTime: Writable<number>;
     feedback: Writable<number>;
-    delayObject: Tone.FeedbackDelay;
+    private delayObject: Tone.FeedbackDelay;
 
     constructor(id: string, initDelayTime: number, initFeedback: number) {
       super(id)
@@ -27,11 +27,11 @@ export class MegaDelay extends MegaNode {
         return this.delayObject;
     }
 
-    change_delay_time(val: number) {
+    change_delay_time(val: number): void {
       this.delayObject.set({delayTime: val});
     }
     
-    change_feedback(val: number) {
+    change_feedback(val: number): void {
       this.delayObject.set({feedback: val});
     }
   }
