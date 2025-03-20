@@ -1,85 +1,99 @@
-import { get, writable, type Writable } from 'svelte/store';
-import * as Tone from 'tone';
-import { pitches,
-    shapes
- } from '../consts';
-import { MegaNode } from './MegaNode';
+import { get, writable, type Writable } from "svelte/store";
+import * as Tone from "tone";
+import { pitches, shapes } from "../consts";
+import { MegaNode } from "./MegaNode";
 
 export class MegaSynth extends MegaNode {
-    // TODO: Rename these to actual slider types
-    volume: Writable<number>;
-    pitch: Writable<number>;
-    shape: Writable<number>;
-    private synthObject: Tone.Synth;
-    pattern: string;
-    part: Tone.Part;
+  // TODO: Rename these to actual slider types
+  volume: Writable<number>;
+  pitch: Writable<number>;
+  shape: Writable<number>;
+  private synthObject: Tone.Synth;
+  pattern: string;
+  part: Tone.Part;
 
-    constructor(id: string, initVolume: number, initPitch: number, initShape: number, pattern: string, isConnected: boolean) {
-        super(id, isConnected);
+  constructor(
+    id: string,
+    initVolume: number,
+    initPitch: number,
+    initShape: number,
+    pattern: string,
+    isConnected: boolean,
+  ) {
+    super(id, isConnected);
 
-        this.synthObject = new Tone.Synth();
+    this.synthObject = new Tone.Synth();
 
-        this.volume = writable(initVolume);
-        this.pitch = writable(initPitch);
-        this.shape = writable(initShape);
+    this.volume = writable(initVolume);
+    this.pitch = writable(initPitch);
+    this.shape = writable(initShape);
 
-        this.volume.subscribe((val) => {
-            this.change_volume(val);
-        })
+    this.volume.subscribe((val) => {
+      this.change_volume(val);
+    });
 
-        this.pitch.subscribe((val) => {
-            this.change_pitch(val);
-        })
-        this.shape.subscribe((val) => {
-            this.change_shape(val);
-        })
+    this.pitch.subscribe((val) => {
+      this.change_pitch(val);
+    });
+    this.shape.subscribe((val) => {
+      this.change_shape(val);
+    });
 
-        // TODO: don't hardcode pattern through constructor - allow for pattern to be set by a dropdown or an input node
-        this.pattern = pattern;
-        // Set melody
-        this.part = new Tone.Part((time, event) => 
-            { this.synthObject.triggerAttackRelease(event.note, event.dur, time)},
-            [{ time : 0, note : "C4", dur : "4n"}, { time : "4n + 8n", note : "E4", dur : "8n"}, { time : "2n", note : "G4", dur : "16n"}, { time : "2n + 8t", note : "B4", dur : "4n"}])    
+    // TODO: don't hardcode pattern through constructor - allow for pattern to be set by a dropdown or an input node
+    this.pattern = pattern;
+    // Set melody
+    this.part = new Tone.Part(
+      (time, event) => {
+        this.synthObject.triggerAttackRelease(event.note, event.dur, time);
+      },
+      [
+        { time: 0, note: "C4", dur: "4n" },
+        { time: "4n + 8n", note: "E4", dur: "8n" },
+        { time: "2n", note: "G4", dur: "16n" },
+        { time: "2n + 8t", note: "B4", dur: "4n" },
+      ],
+    );
+  }
+
+  getNode(): Tone.Synth {
+    return this.synthObject;
+  }
+
+  connect(megaNode: MegaNode): void {
+    super.connect(megaNode);
+    this.enable();
+  }
+
+  enable(): void {
+    console.log("Synth enabled - triggering attack");
+    this.isConnected = true;
+    if (this.pattern == "pattern1") {
+      this.part.loop = true;
+      this.part.start();
+    } else {
+      this.synthObject.triggerAttack(pitches[get(this.pitch)]); // Start a constant note
     }
+    Tone.getTransport().start();
+  }
 
-    getNode(): Tone.Synth {
-        return this.synthObject;
-    }
+  disable(): void {
+    console.log("Synth disabled - triggering release");
+    this.isConnected = false;
+    this.synthObject.triggerRelease(); // Stop the note
+    this.synthObject.disconnect;
+  }
 
-    connect(megaNode: MegaNode): void {
-        super.connect(megaNode)
-        this.enable();
-    }
+  change_volume(volume: number): void {
+    this.synthObject.set({
+      volume: volume,
+    });
+  }
 
-    enable(): void {
-        console.log("Synth enabled - triggering attack");
-        this.isConnected = true;
-        if (this.pattern == 'pattern1') {
-            this.part.loop = true;
-            this.part.start();
-        } else {
-            this.synthObject.triggerAttack(pitches[get(this.pitch)]); // Start a constant note
-        }
-        Tone.getTransport().start();
-    }
+  change_pitch(pitch: number): void {
+    this.synthObject.setNote(pitches[pitch]);
+  }
 
-    disable(): void {
-        console.log("Synth disabled - triggering release");
-        this.isConnected = false;
-        this.synthObject.triggerRelease(); // Stop the note
-        this.synthObject.disconnect;
-    }
-
-    change_volume(volume: number): void {
-        this.synthObject.set({
-            volume: volume
-        })
-    }
-    
-    change_pitch(pitch: number): void {
-        this.synthObject.setNote(pitches[pitch]);    }
-    
-    change_shape(shape: number): void {
-        this.synthObject.oscillator.type = shapes[shape];
-    }
+  change_shape(shape: number): void {
+    this.synthObject.oscillator.type = shapes[shape];
+  }
 }

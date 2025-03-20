@@ -1,21 +1,21 @@
-import * as Tone from 'tone';
+import * as Tone from "tone";
 
 export abstract class MegaNode {
-    id: string;
-    isConnected: boolean;
-    
-    constructor(id: string, isConnected: boolean = false) {
-        this.id = id;
-        this.isConnected = isConnected
-    }
+  id: string;
+  isConnected: boolean;
 
-    abstract getNode(): Tone.ToneAudioNode;
+  constructor(id: string, isConnected: boolean = false) {
+    this.id = id;
+    this.isConnected = isConnected;
+  }
 
-    connect(megaNode: MegaNode): void {
-        this.getNode().connect(megaNode.getNode());
-    }
+  abstract getNode(): Tone.ToneAudioNode;
 
-    connectToOutput(): void {
-        this.getNode().toDestination();
-    }
+  connect(megaNode: MegaNode): void {
+    this.getNode().connect(megaNode.getNode());
+  }
+
+  connectToOutput(): void {
+    this.getNode().toDestination();
+  }
 }

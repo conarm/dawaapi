@@ -36,13 +36,13 @@ Not all nodes have both connection dots.
 
 Audio generator nodes should not have any input, since they are found at the start of a chain. Currently you can connect a pattern node, however in the future this may change.
 
- - Synth
+- Synth
 
 ### Audio effect nodes
 
- - Delay
- - Reverb
- - Phaser
+- Delay
+- Reverb
+- Phaser
 
 ### Audio output node
 

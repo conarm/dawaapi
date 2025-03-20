@@ -1,15 +1,9 @@
-import App from './App.svelte';
+import App from "./App.svelte";
 
-import './app.css';
+import "./app.css";
 
 const app = new App({
-  target: document.getElementById('app')!,
+  target: document.getElementById("app")!,
 });
-
-//create a synth and connect it to the main output (your speakers)
-const synth = new Tone.Synth().toDestination();
-
-//play a middle 'C' for the duration of an 8th note
-synth.triggerAttackRelease("C4", "8n");
 
 export default app;
