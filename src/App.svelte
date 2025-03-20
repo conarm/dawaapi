@@ -209,7 +209,7 @@
         }
       }
       default: {
-        let newMegaSynth = new MegaSynth(0, 0, 0, "2", 'none', false);
+        let newMegaSynth = new MegaSynth(id, 0, 0, 0, 'none', false);
         megaSynthMap.set(id, newMegaSynth);
         return {
           id: id,
