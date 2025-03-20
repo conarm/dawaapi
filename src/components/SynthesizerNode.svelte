@@ -2,8 +2,6 @@
   import { Handle, Position, type NodeProps } from '@xyflow/svelte';
   import type { Writable } from 'svelte/store';
 
-  type $Props = NodeProps;
-
   export let data: { 
     slider1: Writable<number>,
     slider2: Writable<number>,

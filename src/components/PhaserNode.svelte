@@ -2,11 +2,7 @@
     import { Handle, Position, type NodeProps } from '@xyflow/svelte';
     import type { Writable } from 'svelte/store';
    
-    // TODO: what is this for - we don't use it...
-    type $Props = NodeProps;
-   
     // Set up node data
-    // TODO: add extra values here - name, wave type, amplitude, etc... think of the Tone params
     export let data: { 
       slider1: Writable<number>,
       slider2: Writable<number>,
@@ -43,7 +39,7 @@
       type="range"
       min="0"
       max="1000"
-      step="0.01"
+      step="1"
       on:input={(evt) => slider1.set(Number(evt.currentTarget?.value))}
       value={$slider1}
     />
@@ -56,7 +52,7 @@
       type="range"
       min="0"
       max="8"
-      step="0.01"
+      step="1"
       on:input={(evt) => slider2.set(Number(evt.currentTarget?.value))}
       value={$slider2}
     />
@@ -69,7 +65,7 @@
       type="range"
       min="0"
       max="1000"
-      step="0.01"
+      step="1"
       on:input={(evt) => slider3.set(Number(evt.currentTarget?.value))}
       value={$slider3}
     />

@@ -1,8 +1,5 @@
 <script lang="ts">
     import { Handle, Position, type NodeProps } from '@xyflow/svelte';
-   
-    // TODO: what is this for - we don't use it...
-    type $Props = NodeProps;
 
     let showInfo = false;
   </script>
@@ -22,8 +19,6 @@
     <div>
       <b>Audio Out</b>
     </div>
-
-    <!-- No source (output) -->
 
     <!-- Info Popup -->
   </div>

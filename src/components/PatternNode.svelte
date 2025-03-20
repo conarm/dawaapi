@@ -2,11 +2,7 @@
     import { Handle, Position, type NodeProps } from '@xyflow/svelte';
     import type { Writable } from 'svelte/store';
    
-    // TODO: what is this for - we don't use it...
-    type $Props = NodeProps;
-   
     // Set up node data
-    // TODO: add extra values here - name, wave type, amplitude, etc... think of the Tone params
     export let data: { 
       currentPattern: Writable<string>,
     };

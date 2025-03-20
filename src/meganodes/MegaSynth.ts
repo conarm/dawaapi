@@ -1,4 +1,4 @@
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import * as Tone from 'tone';
 import { pitches,
     shapes
@@ -7,46 +7,43 @@ import { MegaNode } from './MegaNode';
 
 export class MegaSynth extends MegaNode {
     // TODO: Rename these to actual slider types
-    slider1: Writable<number>;
-    slider2: Writable<number>;
-    slider3: Writable<number>;
-    pitch: number;
-    synth: Tone.Synth;
+    volume: Writable<number>;
+    pitch: Writable<number>;
+    shape: Writable<number>;
+    synthObject: Tone.Synth;
     pattern: string;
     part: Tone.Part;
 
-    constructor(initVol: number, initPitch: number, initX: number, id: string, pattern: string, isConnected: boolean) {
+    constructor(id: string, initVolume: number, initPitch: number, initShape: number, pattern: string, isConnected: boolean) {
         super(id, isConnected);
 
-        this.pitch = initPitch;
-        this.synth = new Tone.Synth();
+        this.synthObject = new Tone.Synth();
 
-        this.slider1 = writable(initVol);
-        this.slider2 = writable(initPitch);
-        this.slider3 = writable(initX);
+        this.volume = writable(initVolume);
+        this.pitch = writable(initPitch);
+        this.shape = writable(initShape);
 
-        this.slider1.subscribe((val) => {
-            this.change_synth_volume(val);
+        this.volume.subscribe((val) => {
+            this.change_volume(val);
         })
 
-        this.slider2.subscribe((val) => {
-            this.change_synth_pitch(val);
+        this.pitch.subscribe((val) => {
+            this.change_pitch(val);
         })
-        this.slider3.subscribe((val) => {
-            this.change_synth_shape(val);
+        this.shape.subscribe((val) => {
+            this.change_shape(val);
         })
 
         // TODO: don't hardcode pattern through constructor - allow for pattern to be set by a dropdown or an input node
         this.pattern = pattern;
-
-        // set melody
+        // Set melody
         this.part = new Tone.Part((time, event) => 
-            { this.synth.triggerAttackRelease(event.note, event.dur, time)},
+            { this.synthObject.triggerAttackRelease(event.note, event.dur, time)},
             [{ time : 0, note : "C4", dur : "4n"}, { time : "4n + 8n", note : "E4", dur : "8n"}, { time : "2n", note : "G4", dur : "16n"}, { time : "2n + 8t", note : "B4", dur : "4n"}])    
     }
 
     getNode(): Tone.Synth {
-        return this.synth;
+        return this.synthObject;
     }
 
     connect(megaNode: MegaNode): void {
@@ -61,7 +58,7 @@ export class MegaSynth extends MegaNode {
             this.part.loop = true;
             this.part.start();
         } else {
-            this.synth.triggerAttack(pitches[this.pitch]); // Start a constant note
+            this.synthObject.triggerAttack(pitches[get(this.pitch)]); // Start a constant note
         }
         Tone.getTransport().start();
     }
@@ -69,26 +66,21 @@ export class MegaSynth extends MegaNode {
     disable() {
         console.log("Synth disabled - triggering release");
         this.isConnected = false;
-        this.synth.triggerRelease(); // Stop the note
+        this.synthObject.triggerRelease(); // Stop the note
         // TODO: keep this here?
-        this.synth.disconnect;
+        this.synthObject.disconnect;
     }
 
-    change_synth_volume(val: number) {
-        console.log("Volume changed");
-        this.synth.set({
-            volume: val
+    change_volume(volume: number) {
+        this.synthObject.set({
+            volume: volume
         })
     }
     
-    change_synth_pitch(val: number) {
-        console.log("Pitch changed");
-        this.synth.setNote(pitches[val]);
-        this.pitch = val;
-    }
+    change_pitch(pitch: number) {
+        this.synthObject.setNote(pitches[pitch]);    }
     
-    change_synth_shape(val: number) {
-        console.log("Pitch changed");
-        this.synth.oscillator.type = shapes[val];
+    change_shape(shape: number) {
+        this.synthObject.oscillator.type = shapes[shape];
     }
 }

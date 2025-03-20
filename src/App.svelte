@@ -19,20 +19,26 @@
 
   let megaMap = new Map()
   let megaSynthMap = new Map();
-  let megaSynth1 = new MegaSynth(0, 0, 0, "2", 'none', false);
-  let megaSynth2 = new MegaSynth(0, 0, 0, "3", 'none', false);
-  let megaSynth3 = new MegaSynth(0, 0, 0, "4", 'none', false);
-  megaMap.set('2', megaSynth1);
-  megaMap.set('3', megaSynth2);
-  megaMap.set('4', megaSynth3);
+  // let megaSynth1 = new MegaSynth("2", 0, 0, 0, 'none', false);
+  // let megaSynth2 = new MegaSynth("3", 0, 0, 0, 'none', false);
+  // let megaSynth3 = new MegaSynth("4", 0, 0, 0, 'none', false);
+  // megaMap.set('2', megaSynth1);
+  // megaMap.set('3', megaSynth2);
+  // megaMap.set('4', megaSynth3);
 
-  let delay = new MegaDelay(0, 0, 0, "7");
-  megaMap.set('7', delay);
+  // let delay = new MegaDelay("5", 0, 0);
+  // megaMap.set('5', delay);
 
-  let reverb = new MegaReverb(0, 0, 0, "7");
-  megaMap.set('8', reverb);
+  // let reverb = new MegaReverb("6", 0, 0);
+  // megaMap.set('6', reverb);
 
   const nodes = writable<Node[]>([
+    {
+      id: '1',
+      data: {  },
+      position: { x: 350, y: 230 },
+      type: 'audio-out',
+    },
     // {
     //   id: '1',
     //   data: { color: writable('#ff4000') }, 
@@ -57,12 +63,6 @@
     //   position: { x: -200, y: -200 },
     //   type: 'synth',
     // },
-    {
-      id: '1',
-      data: {  },
-      position: { x: 350, y: 230 },
-      type: 'audio-out',
-    },
     // {
     //   id: '6',
     //   data: { currentPattern: writable('pattern1') },
@@ -121,19 +121,20 @@
           console.log(`Connecting ${sourceNode.type} (${sourceNode.id}) to ${targetNode.type} (${targetNode.id})`);
 
           // Connecting to the output
+          // TODO: Make functions for toDest()
           if (targetNode.type === "audio-out") {
               if (sourceNode.type === "synth") {
                   if (!sourceMega.isConnected) {
                       console.log(`Enabling synth ${sourceMega.id}`);
                       sourceMega.enable();
-                      sourceMega.synth.toDestination();
+                      sourceMega.synthObject.toDestination();
                   }
               } else if (sourceNode.type === "delay") {
-                  sourceMega.delay.toDestination();
+                  sourceMega.delayObject.toDestination();
               } else if (sourceNode.type === "reverb") {
-                  sourceMega.reverb.toDestination();
+                  sourceMega.reverbObject.toDestination();
               } else if (sourceNode.type === "phaser") {
-                  sourceMega.phaser.toDestination();
+                  sourceMega.phaserObject.toDestination();
               }
 
           // Connecting to anything else
@@ -171,43 +172,43 @@
       // TODO: Have functions for node creation - don't hardcode it, this is jank
       // Can we combine megaSynth creation and node list updates
       case 'synth': {
-        let newMegaSynth = new MegaSynth(0, 0, 0, id, 'none', false);
+        let newMegaSynth = new MegaSynth(id, 0, 0, 0, 'none', false);
         megaMap.set(id, newMegaSynth);
         return {
           id: id,
           type: label,
           position: { x: 100, y: 100 },
-          data: { slider1: newMegaSynth.slider1, slider2: newMegaSynth.slider2, slider3: newMegaSynth.slider3 },
+          data: { slider1: newMegaSynth.volume, slider2: newMegaSynth.pitch, slider3: newMegaSynth.shape },
         }
       }
       case 'delay': {
-        let newMegaDelay = new MegaDelay(0, 0, 0, id);
+        let newMegaDelay = new MegaDelay(id, 0, 0, 0);
         megaMap.set(id, newMegaDelay);
         return {
           id: id,
           type: label,
           position: { x: 100, y: 100 },
-          data: { slider1: newMegaDelay.slider1, slider2: newMegaDelay.slider2 },
+          data: { slider1: newMegaDelay.delayTime, slider2: newMegaDelay.feedback },
         }
       }
       case 'reverb': {
-        let newMegaDelay = new MegaReverb(0, 0, 0, id);
+        let newMegaDelay = new MegaReverb(id, 0, 0);
         megaMap.set(id, newMegaDelay);
         return {
           id: id,
           type: label,
           position: { x: 100, y: 100 },
-          data: { slider1: newMegaDelay.slider1, slider2: newMegaDelay.slider2 },
+          data: { slider1: newMegaDelay.roomSize, slider2: newMegaDelay.wet },
         }
       }
       case 'phaser': {
-        let newMegaPhaser = new MegaPhaser(15, 5, 1000, id);
+        let newMegaPhaser = new MegaPhaser(id, 15, 5, 1000);
         megaMap.set(id, newMegaPhaser);
         return {
           id: id,
           type: label,
           position: { x: 100, y: 100 },
-          data: { slider1: newMegaPhaser.slider1, slider2: newMegaPhaser.slider2, slider3: newMegaPhaser.slider3 },
+          data: { slider1: newMegaPhaser.frequency, slider2: newMegaPhaser.octaves, slider3: newMegaPhaser.baseFrequency },
         }
       }
       case 'pattern': {
@@ -225,7 +226,7 @@
           id: id,
           type: label,
           position: { x: 100, y: 100 },
-          data: { slider1: newMegaSynth.slider1, slider2: newMegaSynth.slider2, slider3: newMegaSynth.slider3 },
+          data: { slider1: newMegaSynth.volume, slider2: newMegaSynth.pitch, slider3: newMegaSynth.shape },
         }
       }
     }

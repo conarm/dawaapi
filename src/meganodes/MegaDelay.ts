@@ -3,40 +3,35 @@ import * as Tone from 'tone';
 import { MegaNode } from './MegaNode';
 
 export class MegaDelay extends MegaNode {
-    // TODO: Rename these to actual slider types
-    slider1: Writable<number>;
-    slider2: Writable<number>;
-    delay: Tone.FeedbackDelay;
-    id: string;
+    delayTime: Writable<number>;
+    feedback: Writable<number>;
+    delayObject: Tone.FeedbackDelay;
 
-    constructor(initParam1: number, initParam2: number, initParam3: number, id: string) {
+    constructor(id: string, initDelayTime: number, initFeedback: number) {
       super(id)
 
-      this.slider1 = writable(initParam1);
-      this.slider2 = writable(initParam2);
-      this.delay = new Tone.FeedbackDelay(0.5);
+      this.delayTime = writable(initDelayTime);
+      this.feedback = writable(initFeedback);
+      this.delayObject = new Tone.FeedbackDelay(0.5);
 
-      this.slider1.subscribe((val) => {
-        this.change_delay_param_1(val);
+      this.delayTime.subscribe((val) => {
+        this.change_delay_time(val);
       })
 
-      this.slider2.subscribe((val) => {
-        this.change_delay_param_2(val);
+      this.feedback.subscribe((val) => {
+        this.change_feedback(val);
       })
-
-      this.id = id;
     }
 
     getNode(): Tone.FeedbackDelay {
-        return this.delay;
+        return this.delayObject;
     }
 
-    change_delay_param_1(val: number) {
-      console.log("Param 1 changed");
-      this.delay.set({delayTime: val});
+    change_delay_time(val: number) {
+      this.delayObject.set({delayTime: val});
     }
     
-    change_delay_param_2(val: number) {
-      this.delay.set({feedback: val});
+    change_feedback(val: number) {
+      this.delayObject.set({feedback: val});
     }
   }
