@@ -1,6 +1,6 @@
 import { get, writable, type Writable } from "svelte/store";
 import * as Tone from "tone";
-import { pitches, shapes } from "../consts";
+import { patterns, pitches, shapes } from "../consts";
 import { MegaNode } from "./MegaNode";
 
 export class MegaSynth extends MegaNode {
@@ -46,12 +46,7 @@ export class MegaSynth extends MegaNode {
       (time, event) => {
         this.synthObject.triggerAttackRelease(event.note, event.dur, time);
       },
-      [
-        { time: 0, note: "C4", dur: "4n" },
-        { time: "4n + 8n", note: "E4", dur: "8n" },
-        { time: "2n", note: "G4", dur: "16n" },
-        { time: "2n + 8t", note: "B4", dur: "4n" },
-      ],
+      patterns[0]
     );
   }
 
@@ -65,10 +60,10 @@ export class MegaSynth extends MegaNode {
   }
 
   enable(): void {
-    console.log("Synth enabled - triggering attack");
     this.isConnected = true;
     if (this.pattern == "pattern1") {
       this.part.loop = true;
+      this.part.loopEnd = "1m"
       this.part.start();
     } else {
       this.synthObject.triggerAttack(pitches[get(this.pitch)]); // Start a constant note
@@ -77,7 +72,6 @@ export class MegaSynth extends MegaNode {
   }
 
   disable(): void {
-    console.log("Synth disabled - triggering release");
     this.isConnected = false;
     this.synthObject.triggerRelease(); // Stop the note
     this.synthObject.disconnect;

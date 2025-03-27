@@ -19,10 +19,10 @@
 
   let megaMap = new Map()
   let megaSynthMap = new Map();
-  // let megaSynth1 = new MegaSynth("2", 0, 0, 0, 'none', false);
+  let megaSynth1 = new MegaSynth("2", 0, 0, 0, 'none', false);
   // let megaSynth2 = new MegaSynth("3", 0, 0, 0, 'none', false);
   // let megaSynth3 = new MegaSynth("4", 0, 0, 0, 'none', false);
-  // megaMap.set('2', megaSynth1);
+  megaMap.set('2', megaSynth1);
   // megaMap.set('3', megaSynth2);
   // megaMap.set('4', megaSynth3);
 
@@ -45,12 +45,12 @@
     //   position: { x: 200, y: 300 },
     //   type: 'colour',
     // },
-    // {
-    //   id: '2',
-    //   data: { slider1: megaSynth1.slider1, slider2: megaSynth1.slider2, slider3: megaSynth1.slider3 },
-    //   position: { x: -600, y: 200 },
-    //   type: 'synth',
-    // },
+    {
+      id: '2',
+      data: { slider1: megaSynth1.volume, slider2: megaSynth1.pitch, slider3: megaSynth1.shape },
+      position: { x: -600, y: 200 },
+      type: 'synth',
+    },
     // {
     //   id: '3',
     //   data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
@@ -63,12 +63,12 @@
     //   position: { x: -200, y: -200 },
     //   type: 'synth',
     // },
-    // {
-    //   id: '6',
-    //   data: { currentPattern: writable('pattern1') },
-    //   position: { x: -600, y: -130 },
-    //   type: 'pattern',
-    // },
+    {
+      id: '6',
+      data: { currentPattern: writable('pattern1') },
+      position: { x: -600, y: -130 },
+      type: 'pattern',
+    },
     // {
     //   id: '7',
     //   data: { slider1: delay.slider1, slider2: delay.slider2 },
@@ -130,8 +130,10 @@
           } else {
               if (sourceNode.type === "pattern" && targetNode.type === "synth") {
                 targetMega.pattern = 'pattern1';
-                targetMega.disable()
-                targetMega.enable()
+                if (targetMega.isConnected) {
+                  targetMega.disable();
+                  targetMega.enable();
+                }
               } else {
                 sourceMega.connect(targetMega)
               }
@@ -231,6 +233,7 @@
 
   <!-- Make node-menu its own NodeMenu component -->
   <div class="node-menu">
+    Menu: <hr>
     {#each Object.entries(nodeTypes) as [label]}
       {#if label != 'audio-out'}
         <button on:click={() => addNode(label)}>
