@@ -46,7 +46,7 @@ export class MegaSynth extends MegaNode {
       (time, event) => {
         this.synthObject.triggerAttackRelease(event.note, event.dur, time);
       },
-      patterns[0]
+      patterns[pattern]
     );
   }
 
@@ -61,7 +61,15 @@ export class MegaSynth extends MegaNode {
 
   enable(): void {
     this.isConnected = true;
-    if (this.pattern == "pattern1") {
+    if (this.pattern != '') {
+      // enabled with pattern
+      console.log("enabling pattern!")
+      this.part = new Tone.Part(
+        (time, event) => {
+          this.synthObject.triggerAttackRelease(event.note, event.dur, time);
+        },
+        patterns[this.pattern]
+      )
       this.part.loop = true;
       this.part.loopEnd = "1m"
       this.part.start();

@@ -18,11 +18,11 @@
   import { MegaPhaser } from './meganodes/MegaPhaser';
 
   let megaMap = new Map()
-  let megaSynthMap = new Map();
-  let megaSynth1 = new MegaSynth("2", 0, 0, 0, 'none', false);
+  // let megaSynthMap = new Map();
+  // let megaSynth1 = new MegaSynth("2", 0, 0, 0, 'none', false);
   // let megaSynth2 = new MegaSynth("3", 0, 0, 0, 'none', false);
   // let megaSynth3 = new MegaSynth("4", 0, 0, 0, 'none', false);
-  megaMap.set('2', megaSynth1);
+  // megaMap.set('2', megaSynth1);
   // megaMap.set('3', megaSynth2);
   // megaMap.set('4', megaSynth3);
 
@@ -45,12 +45,12 @@
     //   position: { x: 200, y: 300 },
     //   type: 'colour',
     // },
-    {
-      id: '2',
-      data: { slider1: megaSynth1.volume, slider2: megaSynth1.pitch, slider3: megaSynth1.shape },
-      position: { x: -600, y: 200 },
-      type: 'synth',
-    },
+    // {
+    //   id: '2',
+    //   data: { slider1: megaSynth1.volume, slider2: megaSynth1.pitch, slider3: megaSynth1.shape },
+    //   position: { x: -600, y: 200 },
+    //   type: 'synth',
+    // },
     // {
     //   id: '3',
     //   data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
@@ -63,12 +63,12 @@
     //   position: { x: -200, y: -200 },
     //   type: 'synth',
     // },
-    {
-      id: '6',
-      data: { currentPattern: writable('pattern1') },
-      position: { x: -600, y: -130 },
-      type: 'pattern',
-    },
+    // {
+    //   id: '6',
+    //   data: { currentPattern: writable('pattern1') },
+    //   position: { x: -600, y: -130 },
+    //   type: 'pattern',
+    // },
     // {
     //   id: '7',
     //   data: { slider1: delay.slider1, slider2: delay.slider2 },
@@ -91,6 +91,15 @@
     Tone.getTransport().start(); // Start the audio context
   });
 
+  function getMegaObject(node: Node) {
+    console.log(node)
+    return megaMap.get(node.id || "0");
+  }
+
+  function getMegaObjectById(id: string) {
+    return megaMap.get(id);
+  }
+
   // Watch for changes in edges to determine connections
   edges.subscribe((currentEdges) => {
       // Update the routing when there is a change to our edges
@@ -99,12 +108,6 @@
     });
 
     function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
-      // Allow node component indexing by ID
-      const nodeMap = new Map(nodes.map(node => [node.id, node]));
-      function getMegaObject(node: Node) {
-        return megaMap.get(node.id);
-      }
-
       function connectAudioNodes(sourceNode: Node, targetNode: Node) {
           // Get the associate mega (Tone) object for the source and target
           // Some do not have a mega object and don't need it, e.g. audio-out
@@ -140,6 +143,9 @@
           }
       }
 
+      // Allow node component indexing by ID
+      const nodeMap = new Map(nodes.map(node => [node.id, node]));
+
       // For each edge, connect the source to the target
       currentEdges.forEach(edge => {
           const sourceNode = nodeMap.get(edge.source);
@@ -149,6 +155,37 @@
             connectAudioNodes(sourceNode, targetNode);
           }
       });
+  }
+
+  function disconnect(params: { nodes: Node[]; edges: Edge[] }) {
+    console.log(params)
+    if (params.nodes.length > 0) {
+      params.nodes.forEach(node => {
+        if (node.type == "synth" || node.type == "delay" || node.type == "reverb") {
+          console.log("deleting " + node.type)
+          let mega = getMegaObject(node)
+          mega.disconnect();
+          megaMap.delete(node.id)
+        }
+      });
+
+      // Return now
+      return;
+    }
+
+    if (params.edges) {
+      console.log("Looking at edges")
+      const edge = params.edges[0]
+      let megaSource = getMegaObjectById(edge.source)
+      let megaTarget = getMegaObjectById(edge.target)
+      if (megaTarget && megaSource) {
+        megaSource.disconnect(megaTarget.getNode())
+      }
+      if (megaSource) {
+        megaSource.disconnect();
+        megaSource.disable();
+      }
+    }
   }
 
   function addNode(label: any) {
@@ -163,7 +200,7 @@
       // TODO: Have functions for node creation - don't hardcode it, this is jank
       // Can we combine megaSynth creation and node list updates
       case 'synth': {
-        let newMegaSynth = new MegaSynth(id, 0, 0, 0, 'none', false);
+        let newMegaSynth = new MegaSynth(id, 0, 0, 0, '', false);
         megaMap.set(id, newMegaSynth);
         return {
           id: id,
@@ -211,7 +248,7 @@
         }
       }
       default: {
-        let newMegaSynth = new MegaSynth(id, 0, 0, 0, 'none', false);
+        let newMegaSynth = new MegaSynth(id, 0, 0, 0, '', false);
         megaSynthMap.set(id, newMegaSynth);
         return {
           id: id,
@@ -225,7 +262,13 @@
 </script>
 
 <div style:height="100vh">
-  <SvelteFlow {nodes} {edges} {nodeTypes} fitView>
+  <SvelteFlow
+    {nodes}
+    {edges}
+    {nodeTypes}
+    fitView
+    ondelete = {disconnect}
+    >
     <Controls />  
     <Background />
     <MiniMap />

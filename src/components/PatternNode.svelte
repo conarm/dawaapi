@@ -7,7 +7,17 @@
       currentPattern: Writable<string>,
     };
 
-    let patterns = ["pattern1"]
+    let patterns = [
+      "pattern1",
+      "pattern2",
+      "pattern3",
+      "pattern4",
+      "pattern5",
+      "pattern6",
+      "pattern7",
+      "pattern8",
+      "pattern9"
+    ]
    
     const { currentPattern } = data;
 

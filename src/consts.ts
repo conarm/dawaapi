@@ -103,25 +103,45 @@ export const shapes: OmniOscillatorType[] = [
   "sawtooth",
 ];
 
-export const patterns = [
-  [
+export const patterns: { [name: string] : any[]; } = {
+  "pattern1": [
     { time: 0, note: "C4", dur: "4n" },  // Start of measure
     { time: "4n", note: "D4", dur: "4n" }, // Quarter note later
     { time: "2n", note: "E4", dur: "4n" }, // Halfway through measure
     { time: "2n + 4n", note: "F4", dur: "8n" } // Three-quarters through measure
   ],
-  [
+  "pattern2": [
     { time: 0, note: "C4", dur: "4n" },
     { time: "1n", note: "G4", dur: "4n" },
     { time: "2n", note: "E4", dur: "4n" },
     { time: "3n", note: "G4", dur: "4n" },
   ],
-  [
+  "pattern3": [
     { time: 0, note: "C4", dur: "4n" },
     { time: "2n", note: "G4", dur: "16n" },
   ],
-  [
+  "pattern4": [
     { time: 0, note: "C4", dur: "4n" },
     { time: "2n", note: "G4", dur: "16n" },
   ],
-]
+  "pattern5": [
+    { time: 0, note: "C4", dur: "4n" },
+    { time: "2n", note: "G4", dur: "16n" },
+  ],
+  "pattern6": [
+    { time: 0, note: "C4", dur: "4n" },
+    { time: "2n", note: "G4", dur: "16n" },
+  ],
+  "pattern7": [
+    { time: 0, note: "C4", dur: "4n" },
+    { time: "2n", note: "G4", dur: "16n" },
+  ],
+  "pattern8": [
+    { time: 0, note: "C4", dur: "4n" },
+    { time: "2n", note: "G4", dur: "16n" },
+  ],
+  "pattern9": [
+    { time: 0, note: "C4", dur: "4n" },
+    { time: "2n", note: "G4", dur: "16n" },
+  ],
+}

@@ -18,4 +18,15 @@ export abstract class MegaNode {
   connectToOutput(): void {
     this.getNode().toDestination();
   }
+
+  disconnect(target?: Tone.ToneAudioNode): void {
+    console.log("disconnecting node")
+    if (target) {
+      // disconnect only from target
+      this.getNode().disconnect(target);
+    } else {
+      // disconnect from everything
+      this.getNode().disconnect();
+    }
+  }
 }
