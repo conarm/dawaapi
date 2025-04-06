@@ -64,6 +64,7 @@ export class MegaSynth extends MegaNode {
     if (this.pattern != '') {
       // enabled with pattern
       console.log("enabling pattern!")
+      this.part.stop()
       this.part = new Tone.Part(
         (time, event) => {
           this.synthObject.triggerAttackRelease(event.note, event.dur, time);
@@ -83,6 +84,7 @@ export class MegaSynth extends MegaNode {
     this.isConnected = false;
     this.synthObject.triggerRelease(); // Stop the note
     this.synthObject.disconnect;
+    this.part.stop()
   }
 
   change_volume(volume: number): void {
