@@ -75,9 +75,9 @@
       background: #fff;
       border: var(--xy-node-border, var(--xy-node-border-default));
       border-radius: var(--xy-node-border-radius, var(--xy-node-border-radius-default));
+      border-style: dashed;
       font-size: 0.7rem;
     }
-
     
   /* Info button */
   .info-button {
