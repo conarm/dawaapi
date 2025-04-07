@@ -7,6 +7,7 @@
     MiniMap,
     type Node,
     type Edge,
+    type Connection,
   } from '@xyflow/svelte';
   import * as Tone from 'tone';
   import { defaultBPM, nodeTypes, defaultEdges } from './consts';
@@ -259,6 +260,26 @@
       }
     }
   }
+
+  function createEdge(connection: Connection): Edge {
+      console.log("dab")
+      console.log(connection)
+      let mega = getMegaObjectById(connection.source)
+      
+      let style = false
+      if (mega == undefined) {
+        console.log("dub dab")
+        style = true
+      }
+
+      // For each edge, connect the source to the target
+      return {
+        // Do not specify 'id' - let SvelteFlow handle this
+        source: connection.source,
+        target: connection.target,
+        animated: style
+      }
+    }
 </script>
 
 <div style:height="100vh">
@@ -268,6 +289,7 @@
     {nodeTypes}
     fitView
     ondelete = {disconnect}
+    onedgecreate = {createEdge}
     >
     <Controls />  
     <Background />
@@ -276,7 +298,7 @@
 
   <!-- Make node-menu its own NodeMenu component -->
   <div class="node-menu">
-    Menu: <hr>
+    Add nodes: <hr>
     {#each Object.entries(nodeTypes) as [label]}
       {#if label != 'audio-out'}
         <button on:click={() => addNode(label)}>
