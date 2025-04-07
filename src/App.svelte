@@ -265,7 +265,24 @@
       <div class="help-modal">
         <button class="close-help-button" on:click={closeModal}>&times;</button>
         <h2>Help</h2>
-        <p>Help is on the way</p>
+        <p>A range of nodes can be added to the canvas. These nodes can either generate an audio signal or apply effects to an audio signal. Nodes can be added by left-clicking the appropriate buttons on the node menu. Nodes can be connected by dragging the connection dots to the left and right of each node. The left connection dot is an input and the right connection dot is an output. To connect any node X to any node Y, click and drag from node X's right-hand dot (node X's output) to node Y's left-hand dot (node Y's input). Not all nodes have both connection dots.</p>
+
+          
+          <h3>Audio generator nodes</h3>
+          
+          Audio generator nodes should not have any input, since they are found at the start of a chain. Currently you can connect a pattern node, however in the future this may change.
+          <ul>
+            <li>Synth</li>
+          </ul>
+          
+          <h3>Audio effect nodes</h3>
+          <ul>
+              <li>Delay</li>
+              <li>Reverb</li>
+              <li>Phaser</li>
+          </ul>
+          <h3>Audio output node</h3>
+          <p>There is a single Audio Output node. Any chain connected to this node will output audio to the browser. Note that you will not hear anything unless an audio chain goes into this node.</p>
       </div>
     </div>
   {/if}
@@ -332,10 +349,11 @@
     background: white;
     padding: 2rem;
     border-radius: 1rem;
-    max-width: 400px;
+    max-width: 80%;
     width: 90%;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
     position: relative;
+    overflow: auto; /* TODO: make it scrollable with loads of text */
   }
 
   .close-help-button {
