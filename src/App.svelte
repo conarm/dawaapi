@@ -20,69 +20,13 @@
   import { MegaPattern } from './meganodes/MegaPattern';
 
   let megaMap = new Map()
-  // let megaSynthMap = new Map();
-  // let megaSynth1 = new MegaSynth("2", 0, 0, 0, 'none', false);
-  // let megaSynth2 = new MegaSynth("3", 0, 0, 0, 'none', false);
-  // let megaSynth3 = new MegaSynth("4", 0, 0, 0, 'none', false);
-  // megaMap.set('2', megaSynth1);
-  // megaMap.set('3', megaSynth2);
-  // megaMap.set('4', megaSynth3);
-
-  // let delay = new MegaDelay("5", 0, 0);
-  // megaMap.set('5', delay);
-
-  // let reverb = new MegaReverb("6", 0, 0);
-  // megaMap.set('6', reverb);
-
   const nodes = writable<Node[]>([
     {
-      id: '1',
+      id: 'audio-out_1',
       data: {  },
       position: { x: 350, y: 230 },
       type: 'audio-out',
     },
-    // {
-    //   id: '1',
-    //   data: { color: writable('#ff4000') }, 
-    //   position: { x: 200, y: 300 },
-    //   type: 'colour',
-    // },
-    // {
-    //   id: '2',
-    //   data: { slider1: megaSynth1.volume, slider2: megaSynth1.pitch, slider3: megaSynth1.shape },
-    //   position: { x: -600, y: 200 },
-    //   type: 'synth',
-    // },
-    // {
-    //   id: '3',
-    //   data: { slider1: megaSynth2.slider1, slider2: megaSynth2.slider2, slider3: megaSynth2.slider3 },
-    //   position: { x: -400, y: 0 },
-    //   type: 'synth',
-    // },
-    // {
-    //   id: '4',
-    //   data: { slider1: megaSynth3.slider1, slider2: megaSynth3.slider2, slider3: megaSynth3.slider3 },
-    //   position: { x: -200, y: -200 },
-    //   type: 'synth',
-    // },
-    // {
-    //   id: '6',
-    //   data: { currentPattern: writable('pattern1') },
-    //   position: { x: -600, y: -130 },
-    //   type: 'pattern',
-    // },
-    // {
-    //   id: '7',
-    //   data: { slider1: delay.slider1, slider2: delay.slider2 },
-    //   position: { x: -150, y: 30 },
-    //   type: 'delay',
-    // },
-    // {
-    //   id: '8',
-    //   data: { slider1: reverb.slider1, slider2: reverb.slider2 },
-    //   position: { x: 100, y: 30 },
-    //   type: 'reverb',
-    // },
   ]);
 
   // Set default edge
@@ -122,11 +66,9 @@
           // Connecting to the output
           if (targetNode.type === "audio-out") {
               if (sourceNode.type === "synth") {
-                  if (!sourceMega.isConnected) {
                       console.log(`Enabling synth ${sourceMega.id}`);
                       sourceMega.enable();
                       sourceMega.connectToOutput();
-                  }
               } else {
                 sourceMega.connectToOutput();
               }
@@ -160,10 +102,9 @@
   }
 
   function disconnect(params: { nodes: Node[]; edges: Edge[] }) {
-    console.log(params)
     if (params.nodes.length > 0) {
       params.nodes.forEach(node => {
-        if (node.type == "synth" || node.type == "delay" || node.type == "reverb") {
+        if (node.type == "synth" || node.type == "delay" || node.type == "reverb" || node.type == "phaser") {
           console.log("deleting " + node.type)
           let mega = getMegaObject(node)
           mega.disconnect();
@@ -171,7 +112,6 @@
         }
       });
 
-      // Return now
       return;
     }
 
