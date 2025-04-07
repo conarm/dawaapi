@@ -6,6 +6,7 @@ export class MegaReverb extends MegaNode {
   roomSize: Writable<number>;
   wet: Writable<number>;
   private reverbObject: Tone.JCReverb;
+  type: string = "reverb";
 
   constructor(id: string, initRoomSize: number, initWet: number) {
     super(id);

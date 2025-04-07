@@ -11,6 +11,7 @@ export class MegaSynth extends MegaNode {
   private synthObject: Tone.Synth;
   pattern: string;
   part: Tone.Part;
+  type: string = "synth";
 
   constructor(
     id: string,

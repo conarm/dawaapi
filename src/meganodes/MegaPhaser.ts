@@ -7,6 +7,7 @@ export class MegaPhaser extends MegaNode {
   octaves: Writable<number>;
   baseFrequency: Writable<number>;
   private phaserObject: Tone.Phaser;
+  type: string = "phaser";
 
   constructor(
     id: string,

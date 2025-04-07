@@ -6,6 +6,7 @@ export class MegaDelay extends MegaNode {
   delayTime: Writable<number>;
   feedback: Writable<number>;
   private delayObject: Tone.FeedbackDelay;
+  type: string = "delay";
 
   constructor(id: string, initDelayTime: number, initFeedback: number) {
     super(id);

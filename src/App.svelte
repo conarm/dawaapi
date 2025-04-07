@@ -17,6 +17,7 @@
   import { MegaDelay } from './meganodes/MegaDelay';
   import { MegaReverb } from './meganodes/MegaReverb';
   import { MegaPhaser } from './meganodes/MegaPhaser';
+  import { MegaPattern } from './meganodes/MegaPattern';
 
   let megaMap = new Map()
   // let megaSynthMap = new Map();
@@ -133,7 +134,7 @@
           // Connecting to anything else
           } else {
               if (sourceNode.type === "pattern" && targetNode.type === "synth") {
-                targetMega.pattern = 'pattern1';
+                targetMega.pattern = sourceMega.getPattern();
                 if (targetMega.isConnected) {
                   targetMega.disable();
                   targetMega.enable();
@@ -192,7 +193,7 @@
   function addNode(label: any) {
     nodes.update((n) => [
       ...n,
-      createNode(label, String(n.length + 2))
+      createNode(label, label + '_' + Date.now().toString()) // TODO: Make an ID generator function
     ]);
   }
 
@@ -241,6 +242,8 @@
         }
       }
       case 'pattern': {
+        let newMegaPattern = new MegaPattern(id, 'pattern1');
+        megaMap.set(id, newMegaPattern);
         return {
           id: id,
           data: { currentPattern: writable('pattern1') },
@@ -268,7 +271,6 @@
       
       let style = false
       if (mega == undefined) {
-        console.log("dub dab")
         style = true
       }
 
@@ -280,6 +282,18 @@
         animated: style
       }
     }
+
+    const isValidConnection = (connection) => {
+      const { source, sourceHandle, target, targetHandle } = connection;
+      console.log(source);
+      // Block pattern edges to anything but synths, block any non-pattern edges to synths
+      if ((source?.startsWith('pattern') && !target?.startsWith('synth')) ||
+           !source?.startsWith('pattern') && target?.startsWith('synth')) {
+        return false;
+      }
+
+      return true; // Block all other connections
+    };
 </script>
 
 <div style:height="100vh">
@@ -290,6 +304,7 @@
     fitView
     ondelete = {disconnect}
     onedgecreate = {createEdge}
+    isValidConnection={isValidConnection}
     >
     <Controls />  
     <Background />
