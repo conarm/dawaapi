@@ -19,6 +19,11 @@
   import { MegaPhaser } from './meganodes/MegaPhaser';
   import { MegaPattern } from './meganodes/MegaPattern';
 
+  let showModal = false;
+  function closeModal() {
+    showModal = false;
+  }
+  
   let megaMap = new Map()
   const nodes = writable<Node[]>([
     {
@@ -76,6 +81,7 @@
           // Connecting to anything else
           } else {
               if (sourceNode.type === "pattern" && targetNode.type === "synth") {
+                console.log("pattern: " + sourceMega.getPattern())
                 targetMega.pattern = sourceMega.getPattern();
                 if (targetMega.isConnected) {
                   targetMega.disable();
@@ -186,7 +192,7 @@
         megaMap.set(id, newMegaPattern);
         return {
           id: id,
-          data: { currentPattern: writable('pattern1') },
+          data: { currentPattern: newMegaPattern.pattern },
           position: {  x: 100, y: 100 },
           type: 'pattern',
         }
@@ -207,10 +213,9 @@
   function createEdge(connection: Connection): Edge {
       console.log("dab")
       console.log(connection)
-      let mega = getMegaObjectById(connection.source)
       
       let style = false
-      if (mega == undefined) {
+      if (connection.source?.startsWith('pattern')) {
         style = true
       }
 
@@ -251,12 +256,25 @@
     <MiniMap />
   </SvelteFlow>
 
-  <!-- Make node-menu its own NodeMenu component -->
+  <button class="help-button" on:click={() => showModal = true}>
+    ?
+  </button>
+
+  {#if showModal}
+    <div class="help-modal-overlay" aria-hidden="true" on:click={closeModal}> <!-- TODO: WHAT IS ARIA HIDDEN FOR -->
+      <div class="help-modal">
+        <button class="close-help-button" on:click={closeModal}>&times;</button>
+        <h2>Help</h2>
+        <p>Help is on the way</p>
+      </div>
+    </div>
+  {/if}
+
   <div class="node-menu">
-    Add nodes: <hr>
+    Add nodes:<hr>
     {#each Object.entries(nodeTypes) as [label]}
       {#if label != 'audio-out'}
-        <button on:click={() => addNode(label)}>
+        <button class="node-button" on:click={() => addNode(label)}>
           {label}
         </button>
       {/if}
@@ -274,11 +292,60 @@
       box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
     }
     /* TODO: Genericise this styling - how is this best done in svelte? */
-    button {
+    .node-button {
       display: block;
       margin-bottom: 5px;
       padding: 5px;
       cursor: pointer;
     }
+   .help-button {
+    position: fixed !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #646464;
+    color: white;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+
+  .help-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* slightly transparent */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  .help-modal {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    position: relative;
+  }
+
+  .close-help-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
   </style>
 </div>
