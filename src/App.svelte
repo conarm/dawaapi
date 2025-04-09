@@ -31,6 +31,7 @@
       data: {  },
       position: { x: 350, y: 230 },
       type: 'audio-out',
+      deletable: false
     },
   ]);
 
