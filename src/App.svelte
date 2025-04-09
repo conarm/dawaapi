@@ -66,12 +66,9 @@
           const sourceMega = getMegaObject(sourceNode);
           const targetMega = getMegaObject(targetNode);
 
-          if ((!sourceMega || !targetMega) && targetNode.type != "audio-out" && sourceNode.type != "pattern") return;
-
           // Connecting to the output
           if (targetNode.type === "audio-out") {
               if (sourceNode.type === "synth") {
-                      console.log(`Enabling synth ${sourceMega.id}`);
                       sourceMega.enable();
                       sourceMega.connectToOutput();
               } else {
@@ -81,7 +78,6 @@
           // Connecting to anything else
           } else {
               if (sourceNode.type === "pattern" && targetNode.type === "synth") {
-                console.log("pattern: " + sourceMega.getPattern())
                 targetMega.pattern = sourceMega.getPattern();
                 if (targetMega.isConnected) {
                   targetMega.disable();
@@ -111,7 +107,6 @@
     if (params.nodes.length > 0) {
       params.nodes.forEach(node => {
         if (node.type == "synth" || node.type == "delay" || node.type == "reverb" || node.type == "phaser") {
-          console.log("deleting " + node.type)
           let mega = getMegaObject(node)
           mega.disconnect();
           megaMap.delete(node.id)
@@ -122,16 +117,25 @@
     }
 
     if (params.edges) {
-      console.log("Looking at edges")
       const edge = params.edges[0]
       let megaSource = getMegaObjectById(edge.source)
-      let megaTarget = getMegaObjectById(edge.target)
-      if (megaTarget && megaSource) {
-        megaSource.disconnect(megaTarget.getNode())
-      }
-      if (megaSource) {
+
+      // Check if the edge is from a synth or an effect
+      if (edge.source?.startsWith('synth')) {
         megaSource.disconnect();
         megaSource.disable();
+        return;
+      }
+
+      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  edge.source?.startsWith('audio-out')) {
+        let megaTarget = getMegaObjectById(edge.target)
+        megaSource.disconnect(megaTarget.getNode())
+        return;
+      }
+
+      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  !edge.source?.startsWith('audio-out')) {
+        megaSource.disconnect()
+        return;
       }
     }
   }
@@ -199,7 +203,7 @@
       }
       default: {
         let newMegaSynth = new MegaSynth(id, 0, 0, 0, '', false);
-        megaSynthMap.set(id, newMegaSynth);
+        megaMap.set(id, newMegaSynth);
         return {
           id: id,
           type: label,
@@ -211,9 +215,6 @@
   }
 
   function createEdge(connection: Connection): Edge {
-      console.log("dab")
-      console.log(connection)
-      
       let style = false
       if (connection.source?.startsWith('pattern')) {
         style = true
@@ -230,7 +231,6 @@
 
     const isValidConnection = (connection) => {
       const { source, sourceHandle, target, targetHandle } = connection;
-      console.log(source);
       // Block pattern edges to anything but synths, block any non-pattern edges to synths
       if ((source?.startsWith('pattern') && !target?.startsWith('synth')) ||
            !source?.startsWith('pattern') && target?.startsWith('synth')) {
