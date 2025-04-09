@@ -51,93 +51,50 @@
     return megaMap.get(id);
   }
 
-  // Watch for changes in edges to determine connections
-  edges.subscribe((currentEdges) => {
-      // Update the routing when there is a change to our edges
-      // TODO: Are we running this too much?
-      updateAudioRouting(get(nodes), currentEdges);      
-    });
+  function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
+    function connectAudioNodes(sourceNode: Node, targetNode: Node) {
+        // Get the associate mega (Tone) object for the source and target
+        // Some do not have a mega object and don't need it, e.g. audio-out
+        // For now pattern has no mega object either
+        const sourceMega = getMegaObject(sourceNode);
+        const targetMega = getMegaObject(targetNode);
 
-    function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
-      function connectAudioNodes(sourceNode: Node, targetNode: Node) {
-          // Get the associate mega (Tone) object for the source and target
-          // Some do not have a mega object and don't need it, e.g. audio-out
-          // For now pattern has no mega object either
-          const sourceMega = getMegaObject(sourceNode);
-          const targetMega = getMegaObject(targetNode);
+        // Connecting to the output
+        if (targetNode.type === "audio-out") {
+            if (sourceNode.type === "synth") {
+                    sourceMega.enable();
+                    sourceMega.connectToOutput();
+            } else {
+              sourceMega.connectToOutput();
+            }
 
-          // Connecting to the output
-          if (targetNode.type === "audio-out") {
-              if (sourceNode.type === "synth") {
-                      sourceMega.enable();
-                      sourceMega.connectToOutput();
-              } else {
-                sourceMega.connectToOutput();
+        // Connecting to anything else
+        } else {
+            if (sourceNode.type === "pattern" && targetNode.type === "synth") {
+              // TODO: This allows pattern setting on edge creation but not when it changes on the pattern node
+              targetMega.pattern = sourceMega.getPattern();
+              if (targetMega.isConnected) {
+                targetMega.disable();
+                targetMega.enable();
               }
-
-          // Connecting to anything else
-          } else {
-              if (sourceNode.type === "pattern" && targetNode.type === "synth") {
-                targetMega.pattern = sourceMega.getPattern();
-                if (targetMega.isConnected) {
-                  targetMega.disable();
-                  targetMega.enable();
-                }
-              } else {
-                sourceMega.connect(targetMega)
-              }
-          }
-      }
-
-      // Allow node component indexing by ID
-      const nodeMap = new Map(nodes.map(node => [node.id, node]));
-
-      // For each edge, connect the source to the target
-      currentEdges.forEach(edge => {
-          const sourceNode = nodeMap.get(edge.source);
-          const targetNode = nodeMap.get(edge.target);
-
-          if (sourceNode && targetNode) {
-            connectAudioNodes(sourceNode, targetNode);
-          }
-      });
-  }
-
-  function disconnect(params: { nodes: Node[]; edges: Edge[] }) {
-    if (params.nodes.length > 0) {
-      params.nodes.forEach(node => {
-        if (node.type == "synth" || node.type == "delay" || node.type == "reverb" || node.type == "phaser") {
-          let mega = getMegaObject(node)
-          mega.disconnect();
-          megaMap.delete(node.id)
+            } else {
+              sourceMega.connect(targetMega)
+            }
         }
-      });
-
-      return;
     }
 
-    if (params.edges) {
-      const edge = params.edges[0]
-      let megaSource = getMegaObjectById(edge.source)
+    // Allow node component indexing by ID
+    const nodeMap = new Map(nodes.map(node => [node.id, node]));
 
-      // Check if the edge is from a synth or an effect
-      if (edge.source?.startsWith('synth')) {
-        megaSource.disconnect();
-        megaSource.disable();
-        return;
-      }
+    // For each edge, connect the source to the target
+    currentEdges.forEach(edge => {
+        const sourceNode = nodeMap.get(edge.source);
+        const targetNode = nodeMap.get(edge.target);
 
-      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  edge.source?.startsWith('audio-out')) {
-        let megaTarget = getMegaObjectById(edge.target)
-        megaSource.disconnect(megaTarget.getNode())
-        return;
-      }
-
-      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  !edge.source?.startsWith('audio-out')) {
-        megaSource.disconnect()
-        return;
-      }
-    }
+        if (sourceNode && targetNode) {
+          connectAudioNodes(sourceNode, targetNode);
+        }
+    });
   }
 
   function addNode(label: any) {
@@ -150,7 +107,6 @@
   function createNode(label: string, id: string): Node {
     switch(label) {
       // TODO: Have functions for node creation - don't hardcode it, this is jank
-      // Can we combine megaSynth creation and node list updates
       case 'synth': {
         let newMegaSynth = new MegaSynth(id, 0, 0, 0, '', false);
         megaMap.set(id, newMegaSynth);
@@ -214,31 +170,73 @@
     }
   }
 
-  function createEdge(connection: Connection): Edge {
-      let style = false
-      if (connection.source?.startsWith('pattern')) {
-        style = true
-      }
+  function onDelete(params: { nodes: Node[]; edges: Edge[] }) {
+    if (params.nodes.length > 0) {
+      params.nodes.forEach(node => {
+        if (node.type == "synth" || node.type == "delay" || node.type == "reverb" || node.type == "phaser") {
+          let mega = getMegaObject(node)
+          mega.disconnect();
+          megaMap.delete(node.id)
+        }
+      });
 
-      // For each edge, connect the source to the target
-      return {
-        // Do not specify 'id' - let SvelteFlow handle this
-        source: connection.source,
-        target: connection.target,
-        animated: style
-      }
+      return;
     }
 
-    const isValidConnection = (connection) => {
-      const { source, sourceHandle, target, targetHandle } = connection;
-      // Block pattern edges to anything but synths, block any non-pattern edges to synths
-      if ((source?.startsWith('pattern') && !target?.startsWith('synth')) ||
-           !source?.startsWith('pattern') && target?.startsWith('synth')) {
-        return false;
+    if (params.edges) {
+      const edge = params.edges[0]
+      let megaSource = getMegaObjectById(edge.source)
+
+      // Check if the edge is from a synth or an effect
+      if (edge.source?.startsWith('synth')) {
+        megaSource.disconnect();
+        megaSource.disable();
+        return;
       }
 
-      return true; // Block all other connections
-    };
+      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  edge.source?.startsWith('audio-out')) {
+        let megaTarget = getMegaObjectById(edge.target)
+        megaSource.disconnect(megaTarget.getNode())
+        return;
+      }
+
+      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  !edge.source?.startsWith('audio-out')) {
+        megaSource.disconnect()
+        return;
+      }
+    }
+  }
+
+  function onEdgeCreate(connection: Connection): Edge {
+    let style = false
+    if (connection.source?.startsWith('pattern')) {
+      style = true
+    }
+
+    // For each edge, connect the source to the target
+    return {
+      // Do not specify 'id' - let SvelteFlow handle this
+      source: connection.source,
+      target: connection.target,
+      animated: style
+    }
+  }
+
+  function onConnect(connection: Connection): void {
+    // TODO: do something with connection? make it so that we aren't updating the whole audio graph each time?
+    updateAudioRouting(get(nodes), get(edges));
+  }
+
+  const isValidConnection = (connection) => {
+    const { source, sourceHandle, target, targetHandle } = connection;
+    // Block pattern edges to anything but synths, block any non-pattern edges to synths
+    if ((source?.startsWith('pattern') && !target?.startsWith('synth')) ||
+          !source?.startsWith('pattern') && target?.startsWith('synth')) {
+      return false;
+    }
+
+    return true; // Block all other connections
+  };
 </script>
 
 <div style:height="100vh">
@@ -247,8 +245,9 @@
     {edges}
     {nodeTypes}
     fitView
-    ondelete = {disconnect}
-    onedgecreate = {createEdge}
+    ondelete = {onDelete}
+    onedgecreate = {onEdgeCreate}
+    onconnect = {onConnect}
     isValidConnection={isValidConnection}
     >
     <Controls />  

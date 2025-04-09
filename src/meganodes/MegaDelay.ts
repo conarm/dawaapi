@@ -14,6 +14,7 @@ export class MegaDelay extends MegaNode {
     this.delayTime = writable(initDelayTime);
     this.feedback = writable(initFeedback);
     this.delayObject = new Tone.FeedbackDelay(0.5);
+    this.delayObject.set({ wet: 0.8 });
 
     this.delayTime.subscribe((val) => {
       this.change_delay_time(val);
