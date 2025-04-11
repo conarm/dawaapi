@@ -10,7 +10,7 @@
     type Connection,
   } from '@xyflow/svelte';
   import * as Tone from 'tone';
-  import { defaultBPM, nodeTypes, defaultEdges } from './consts';
+  import { defaultBPM, nodeTypes, defaultEdges, megaMap } from './consts';
   import { onMount } from 'svelte';
   import '@xyflow/svelte/dist/style.css';
   import { MegaSynth } from './meganodes/MegaSynth';
@@ -18,13 +18,13 @@
   import { MegaReverb } from './meganodes/MegaReverb';
   import { MegaPhaser } from './meganodes/MegaPhaser';
   import { MegaPattern } from './meganodes/MegaPattern';
+  import { createNode } from './NodeFactory';
 
   let showModal = false;
   function closeModal() {
     showModal = false;
   }
   
-  let megaMap = new Map()
   const nodes = writable<Node[]>([
     {
       id: 'audio-out_1',
@@ -61,22 +61,23 @@
         const targetMega = getMegaObject(targetNode);
 
         // Connecting to the output
-        if (targetNode.type === "audio-out") {
+        // sourceMega MegaNode, targetMega null
+        if (targetNode.type === "audio-out" && sourceMega) {
             if (sourceNode.type === "synth") {
-                    sourceMega.enable();
+                    (sourceMega as MegaSynth).enable(); // TODO: casting is bad
                     sourceMega.connectToOutput();
             } else {
               sourceMega.connectToOutput();
             }
 
         // Connecting to anything else
-        } else {
+        } else if (sourceMega && targetMega) {
             if (sourceNode.type === "pattern" && targetNode.type === "synth") {
               // TODO: This allows pattern setting on edge creation but not when it changes on the pattern node
-              targetMega.pattern = sourceMega.getPattern();
+              (targetMega as MegaSynth).pattern = (sourceMega as MegaPattern).getPattern();
               if (targetMega.isConnected) {
-                targetMega.disable();
-                targetMega.enable();
+                (targetMega as MegaSynth).disable();
+                (targetMega as MegaSynth).enable(); // TODO: again - casting is bad
               }
             } else {
               sourceMega.connect(targetMega)
@@ -105,79 +106,15 @@
     ]);
   }
 
-  function createNode(label: string, id: string): Node {
-    switch(label) {
-      // TODO: Have functions for node creation - don't hardcode it, this is jank
-      case 'synth': {
-        let newMegaSynth = new MegaSynth(id, 0, 0, 0, '', false);
-        megaMap.set(id, newMegaSynth);
-        return {
-          id: id,
-          type: label,
-          position: { x: 100, y: 100 },
-          data: { slider1: newMegaSynth.volume, slider2: newMegaSynth.pitch, slider3: newMegaSynth.shape },
-        }
-      }
-      case 'delay': {
-        let newMegaDelay = new MegaDelay(id, 0, 0);
-        megaMap.set(id, newMegaDelay);
-        return {
-          id: id,
-          type: label,
-          position: { x: 100, y: 100 },
-          data: { slider1: newMegaDelay.delayTime, slider2: newMegaDelay.feedback },
-        }
-      }
-      case 'reverb': {
-        let newMegaDelay = new MegaReverb(id, 0, 0);
-        megaMap.set(id, newMegaDelay);
-        return {
-          id: id,
-          type: label,
-          position: { x: 100, y: 100 },
-          data: { slider1: newMegaDelay.roomSize, slider2: newMegaDelay.wet },
-        }
-      }
-      case 'phaser': {
-        let newMegaPhaser = new MegaPhaser(id, 15, 5, 1000);
-        megaMap.set(id, newMegaPhaser);
-        return {
-          id: id,
-          type: label,
-          position: { x: 100, y: 100 },
-          data: { slider1: newMegaPhaser.frequency, slider2: newMegaPhaser.octaves, slider3: newMegaPhaser.baseFrequency },
-        }
-      }
-      case 'pattern': {
-        let newMegaPattern = new MegaPattern(id, 'pattern1');
-        megaMap.set(id, newMegaPattern);
-        return {
-          id: id,
-          data: { currentPattern: newMegaPattern.pattern },
-          position: {  x: 100, y: 100 },
-          type: 'pattern',
-        }
-      }
-      default: {
-        let newMegaSynth = new MegaSynth(id, 0, 0, 0, '', false);
-        megaMap.set(id, newMegaSynth);
-        return {
-          id: id,
-          type: label,
-          position: { x: 100, y: 100 },
-          data: { slider1: newMegaSynth.volume, slider2: newMegaSynth.pitch, slider3: newMegaSynth.shape },
-        }
-      }
-    }
-  }
-
   function onDelete(params: { nodes: Node[]; edges: Edge[] }) {
     if (params.nodes.length > 0) {
       params.nodes.forEach(node => {
         if (node.type == "synth" || node.type == "delay" || node.type == "reverb" || node.type == "phaser") {
           let mega = getMegaObject(node)
-          mega.disconnect();
-          megaMap.delete(node.id)
+          if (mega) {
+            mega.disconnect();
+            megaMap.delete(node.id)
+          }
         }
       });
 
@@ -189,19 +126,21 @@
       let megaSource = getMegaObjectById(edge.source)
 
       // Check if the edge is from a synth or an effect
-      if (edge.source?.startsWith('synth')) {
+      if (edge.source?.startsWith('synth') && megaSource) {
         megaSource.disconnect();
-        megaSource.disable();
+        (megaSource as MegaSynth).disable(); // TODO: bad cast
         return;
       }
 
-      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  edge.source?.startsWith('audio-out')) {
+      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  edge.source?.startsWith('audio-out') && megaSource) {
         let megaTarget = getMegaObjectById(edge.target)
-        megaSource.disconnect(megaTarget.getNode())
+        if (megaTarget) {
+          megaSource.disconnect(megaTarget.getNode()) // TODO: bad cast
+        }
         return;
       }
 
-      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  !edge.source?.startsWith('audio-out')) {
+      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  !edge.source?.startsWith('audio-out') && megaSource) {
         megaSource.disconnect()
         return;
       }

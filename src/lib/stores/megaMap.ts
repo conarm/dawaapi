@@ -1,0 +1,1 @@
+export const megaMap = new Map<string, any>();
