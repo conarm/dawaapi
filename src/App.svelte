@@ -14,9 +14,6 @@
   import { onMount } from 'svelte';
   import '@xyflow/svelte/dist/style.css';
   import { MegaSynth } from './meganodes/MegaSynth';
-  import { MegaDelay } from './meganodes/MegaDelay';
-  import { MegaReverb } from './meganodes/MegaReverb';
-  import { MegaPhaser } from './meganodes/MegaPhaser';
   import { MegaPattern } from './meganodes/MegaPattern';
   import { createNode } from './NodeFactory';
 
@@ -43,22 +40,29 @@
     Tone.getTransport().start(); // Start the audio context
   });
 
-  function getMegaObject(node: Node) {
-    console.log(node)
-    return megaMap.get(node.id || "0");
-  }
-
   function getMegaObjectById(id: string) {
     return megaMap.get(id);
   }
 
   function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
+    const nodeMap = new Map(nodes.map(node => [node.id, node]));
+
+    // For each edge, connect the source to the target
+    currentEdges.forEach(edge => {
+        const sourceNode = nodeMap.get(edge.source);
+        const targetNode = nodeMap.get(edge.target);
+
+        if (sourceNode && targetNode) {
+          connectAudioNodes(sourceNode, targetNode);
+        }
+    });
+    
     function connectAudioNodes(sourceNode: Node, targetNode: Node) {
         // Get the associate mega (Tone) object for the source and target
         // Some do not have a mega object and don't need it, e.g. audio-out
         // For now pattern has no mega object either
-        const sourceMega = getMegaObject(sourceNode);
-        const targetMega = getMegaObject(targetNode);
+        const sourceMega = getMegaObjectById(sourceNode.id);
+        const targetMega = getMegaObjectById(targetNode.id);
 
         // Connecting to the output
         // sourceMega MegaNode, targetMega null
@@ -84,19 +88,6 @@
             }
         }
     }
-
-    // Allow node component indexing by ID
-    const nodeMap = new Map(nodes.map(node => [node.id, node]));
-
-    // For each edge, connect the source to the target
-    currentEdges.forEach(edge => {
-        const sourceNode = nodeMap.get(edge.source);
-        const targetNode = nodeMap.get(edge.target);
-
-        if (sourceNode && targetNode) {
-          connectAudioNodes(sourceNode, targetNode);
-        }
-    });
   }
 
   function addNode(label: any) {
@@ -110,7 +101,7 @@
     if (params.nodes.length > 0) {
       params.nodes.forEach(node => {
         if (node.type == "synth" || node.type == "delay" || node.type == "reverb" || node.type == "phaser") {
-          let mega = getMegaObject(node)
+          let mega = getMegaObjectById(node.id)
           if (mega) {
             mega.disconnect();
             megaMap.delete(node.id)
