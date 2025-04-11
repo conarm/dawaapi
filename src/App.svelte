@@ -45,38 +45,31 @@
   }
 
   function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
-    const nodeMap = new Map(nodes.map(node => [node.id, node]));
-
     // For each edge, connect the source to the target
     currentEdges.forEach(edge => {
-        const sourceNode = nodeMap.get(edge.source);
-        const targetNode = nodeMap.get(edge.target);
-
-        if (sourceNode && targetNode) {
-          connectAudioNodes(sourceNode, targetNode);
-        }
+      connectAudioNodes(edge.source, edge.target);
     });
     
-    function connectAudioNodes(sourceNode: Node, targetNode: Node) {
+    function connectAudioNodes(sourceId: string, targetId: string) {
         // Get the associate mega (Tone) object for the source and target
         // Some do not have a mega object and don't need it, e.g. audio-out
         // For now pattern has no mega object either
-        const sourceMega = getMegaObjectById(sourceNode.id);
-        const targetMega = getMegaObjectById(targetNode.id);
+        const sourceMega = getMegaObjectById(sourceId);
+        const targetMega = getMegaObjectById(targetId);
 
         // Connecting to the output
         // sourceMega MegaNode, targetMega null
-        if (targetNode.type === "audio-out" && sourceMega) {
-            if (sourceNode.type === "synth") {
-                    (sourceMega as MegaSynth).enable(); // TODO: casting is bad
-                    sourceMega.connectToOutput();
+        if (targetId.startsWith("audio-out") && sourceMega) {
+            if (sourceId.startsWith("synth")) {
+                (sourceMega as MegaSynth).enable(); // TODO: casting is bad
+                sourceMega.connectToOutput();
             } else {
               sourceMega.connectToOutput();
             }
 
         // Connecting to anything else
         } else if (sourceMega && targetMega) {
-            if (sourceNode.type === "pattern" && targetNode.type === "synth") {
+            if (sourceId.startsWith("pattern") && targetId.startsWith("synth")) {
               // TODO: This allows pattern setting on edge creation but not when it changes on the pattern node
               (targetMega as MegaSynth).pattern = (sourceMega as MegaPattern).getPattern();
               if (targetMega.isConnected) {
