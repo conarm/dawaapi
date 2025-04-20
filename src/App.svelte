@@ -191,8 +191,7 @@
 
   
   {#if showHelp}
-    <Modal closeModal={closeHelp} title={helpModalContent.title} body={helpModalContent.body}>
-    </Modal>
+    <Modal closeModal={closeHelp} title={helpModalContent.title} body={helpModalContent.body} />
   {/if}
 
   <div class="node-menu">
