@@ -10,7 +10,7 @@
     type Connection,
   } from '@xyflow/svelte';
   import * as Tone from 'tone';
-  import { defaultBPM, nodeTypes, defaultEdges, wrapperMap, helpModalContent } from './consts';
+  import { defaultBPM, nodeTypes, wrapperMap, helpModalContent } from './consts';
   import { onMount } from 'svelte';
   import '@xyflow/svelte/dist/style.css';
   import { WrapperSynth } from './wrappers/SynthWrapper';
