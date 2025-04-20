@@ -16,10 +16,17 @@
   import { WrapperSynth } from './wrappers/SynthWrapper';
   import { WrapperPattern } from './wrappers/PatternWrapper';
   import { createNode } from './NodeFactory';
+  import Modal from './components/Modal.svelte';
 
-  let showModal = false;
-  function closeModal() {
-    showModal = false;
+  let showHelp = false;
+
+  function openHelp() {
+    console.log("POO")
+    showHelp = true;
+  }
+
+  function closeHelp() {
+    showHelp = false;
   }
   
   const nodes = writable<Node[]>([
@@ -179,15 +186,14 @@
     <MiniMap />
   </SvelteFlow>
 
-  <button class="help-button" on:click={() => showModal = true}>
+  <button class="help-button" on:click={openHelp}>
     ?
   </button>
 
-  {#if showModal}
-    <div class="help-modal-overlay" aria-hidden="true" on:click={closeModal}> <!-- TODO: WHAT IS ARIA HIDDEN FOR -->
-      <div class="help-modal">
-        <button class="close-help-button" on:click={closeModal}>&times;</button>
-        <h2>Help</h2>
+  
+  {#if showHelp}
+    <Modal closeModal={closeHelp}>
+      <h2>Help</h2>
         <p>A range of nodes can be added to the canvas. These nodes can either generate an audio signal or apply effects to an audio signal. Nodes can be added by left-clicking the appropriate buttons on the node menu. Nodes can be connected by dragging the connection dots to the left and right of each node. The left connection dot is an input and the right connection dot is an output. To connect any node X to any node Y, click and drag from node X's right-hand dot (node X's output) to node Y's left-hand dot (node Y's input). Not all nodes have both connection dots.</p>
 
           
@@ -206,8 +212,7 @@
           </ul>
           <h3>Audio output node</h3>
           <p>There is a single Audio Output node. Any chain connected to this node will output audio to the browser. Note that you will not hear anything unless an audio chain goes into this node.</p>
-      </div>
-    </div>
+    </Modal>
   {/if}
 
   <div class="node-menu">
@@ -253,40 +258,6 @@
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-  }
-
-  .help-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* slightly transparent */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-  }
-
-  .help-modal {
-    background: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    max-width: 80%;
-    width: 90%;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-    position: relative;
-    overflow: auto; /* TODO: make it scrollable with loads of text */
-  }
-
-  .close-help-button {
-    position: absolute;
-    top: 0.5rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
   }
   </style>
 </div>
