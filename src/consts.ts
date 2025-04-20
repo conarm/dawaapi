@@ -17,7 +17,6 @@ export const wrapperMap = new Map<string, WrapperNode>();
 // Set node types
 // The 'type' property on Nodes in the node array should match any of these typenames (or just not specify 'type')
 export const nodeTypes = {
-  cookie: TestColourNode,
   synth: SynthesizerNode,
   "audio-out": AudioOutNode,
   pattern: PatternNode,
