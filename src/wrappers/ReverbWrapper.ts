@@ -1,8 +1,8 @@
 import { writable, type Writable } from "svelte/store";
 import * as Tone from "tone";
-import { MegaNode } from "./MegaNode";
+import { WrapperNode } from "./WrapperNode";
 
-export class MegaReverb extends MegaNode {
+export class WrapperReverb extends WrapperNode {
   roomSize: Writable<number>;
   wet: Writable<number>;
   private reverbObject: Tone.JCReverb;

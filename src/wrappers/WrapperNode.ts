@@ -1,6 +1,6 @@
 import * as Tone from "tone";
 
-export abstract class MegaNode {
+export abstract class WrapperNode {
   id: string;
   isConnected: boolean;
 
@@ -11,8 +11,8 @@ export abstract class MegaNode {
 
   abstract getNode(): Tone.ToneAudioNode;
 
-  connect(megaNode: MegaNode): void {
-    this.getNode().connect(megaNode.getNode());
+  connect(wrapperNode: WrapperNode): void {
+    this.getNode().connect(wrapperNode.getNode());
   }
 
   connectToOutput(): void {

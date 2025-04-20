@@ -1,8 +1,8 @@
 import { writable, type Writable } from "svelte/store";
 import * as Tone from "tone";
-import { MegaNode } from "./MegaNode";
+import { WrapperNode } from "./WrapperNode";
 
-export class MegaDelay extends MegaNode {
+export class WrapperDelay extends WrapperNode {
   delayTime: Writable<number>;
   feedback: Writable<number>;
   private delayObject: Tone.FeedbackDelay;

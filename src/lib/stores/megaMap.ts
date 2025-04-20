@@ -1,1 +1,1 @@
-export const megaMap = new Map<string, any>();
+export const wrapperMap = new Map<string, any>();

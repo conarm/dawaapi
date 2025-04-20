@@ -1,17 +1,17 @@
 import type { Node } from '@xyflow/svelte'; // or 'reactflow' if it's the React version
-import { megaMap } from './consts';
-import { MegaSynth } from './meganodes/MegaSynth';
-import { MegaDelay } from './meganodes/MegaDelay';
-import { MegaReverb } from './meganodes/MegaReverb';
-import { MegaPhaser } from './meganodes/MegaPhaser';
-import { MegaPattern } from './meganodes/MegaPattern';
+import { wrapperMap } from './consts';
+import { WrapperSynth } from './wrappers/SynthWrapper';
+import { WrapperDelay } from './wrappers/DelayWrapper';
+import { WrapperReverb } from './wrappers/ReverbWrapper';
+import { WrapperPhaser } from './wrappers/PhaserWrapper';
+import { WrapperPattern } from './wrappers/PatternWrapper';
 
 type NodeCreator = (id: string) => Node;
 
 const nodeCreators: Record<string, NodeCreator> = {
   synth: (id) => {
-    const inst = new MegaSynth(id, 0, 0, 0, '', false);
-    megaMap.set(id, inst);
+    const inst = new WrapperSynth(id, 0, 0, 0, '', false);
+    wrapperMap.set(id, inst);
     return {
       id,
       type: 'synth',
@@ -25,8 +25,8 @@ const nodeCreators: Record<string, NodeCreator> = {
   },
 
   delay: (id) => {
-    const inst = new MegaDelay(id, 0, 0);
-    megaMap.set(id, inst);
+    const inst = new WrapperDelay(id, 0, 0);
+    wrapperMap.set(id, inst);
     return {
       id,
       type: 'delay',
@@ -39,8 +39,8 @@ const nodeCreators: Record<string, NodeCreator> = {
   },
 
   reverb: (id) => {
-    const inst = new MegaReverb(id, 0, 0);
-    megaMap.set(id, inst);
+    const inst = new WrapperReverb(id, 0, 0);
+    wrapperMap.set(id, inst);
     return {
       id,
       type: 'reverb',
@@ -53,8 +53,8 @@ const nodeCreators: Record<string, NodeCreator> = {
   },
 
   phaser: (id) => {
-    const inst = new MegaPhaser(id, 15, 5, 1000);
-    megaMap.set(id, inst);
+    const inst = new WrapperPhaser(id, 15, 5, 1000);
+    wrapperMap.set(id, inst);
     return {
       id,
       type: 'phaser',
@@ -68,8 +68,8 @@ const nodeCreators: Record<string, NodeCreator> = {
   },
 
   pattern: (id) => {
-    const inst = new MegaPattern(id, 'pattern1');
-    megaMap.set(id, inst);
+    const inst = new WrapperPattern(id, 'pattern1');
+    wrapperMap.set(id, inst);
     return {
       id,
       type: 'pattern',

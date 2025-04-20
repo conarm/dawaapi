@@ -8,11 +8,11 @@ import { Position, type Edge } from "@xyflow/svelte";
 import type { OmniOscillatorType } from "tone/build/esm/source/oscillator/OscillatorInterface";
 import { writable } from "svelte/store";
 import PhaserNode from "./components/PhaserNode.svelte";
-import type { MegaNode } from "./meganodes/MegaNode";
+import type { WrapperNode } from "./wrappers/WrapperNode";
 
 export const defaultBPM = 150;
 export const defaultEdges = writable<Edge[]>([]);
-export const megaMap = new Map<string, MegaNode>();
+export const wrapperMap = new Map<string, WrapperNode>();
 
 // Set node types
 // The 'type' property on Nodes in the node array should match any of these typenames (or just not specify 'type')

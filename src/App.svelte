@@ -10,11 +10,11 @@
     type Connection,
   } from '@xyflow/svelte';
   import * as Tone from 'tone';
-  import { defaultBPM, nodeTypes, defaultEdges, megaMap } from './consts';
+  import { defaultBPM, nodeTypes, defaultEdges, wrapperMap } from './consts';
   import { onMount } from 'svelte';
   import '@xyflow/svelte/dist/style.css';
-  import { MegaSynth } from './meganodes/MegaSynth';
-  import { MegaPattern } from './meganodes/MegaPattern';
+  import { WrapperSynth } from './wrappers/SynthWrapper';
+  import { WrapperPattern } from './wrappers/PatternWrapper';
   import { createNode } from './NodeFactory';
 
   let showModal = false;
@@ -40,8 +40,8 @@
     Tone.getTransport().start(); // Start the audio context
   });
 
-  function getMegaObjectById(id: string) {
-    return megaMap.get(id);
+  function getWrapperObjectById(id: string) {
+    return wrapperMap.get(id);
   }
 
   function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
@@ -51,33 +51,33 @@
     });
     
     function connectAudioNodes(sourceId: string, targetId: string) {
-        // Get the associate mega (Tone) object for the source and target
-        // Some do not have a mega object and don't need it, e.g. audio-out
-        // For now pattern has no mega object either
-        const sourceMega = getMegaObjectById(sourceId);
-        const targetMega = getMegaObjectById(targetId);
+        // Get the associate wrapper (Tone) object for the source and target
+        // Some do not have a wrapper object and don't need it, e.g. audio-out
+        // For now pattern has no wrapper object either
+        const sourceWrapper = getWrapperObjectById(sourceId);
+        const targetWrapper = getWrapperObjectById(targetId);
 
         // Connecting to the output
-        // sourceMega MegaNode, targetMega null
-        if (targetId.startsWith("audio-out") && sourceMega) {
+        // sourceWrapper WrapperNode, targetWrapper null
+        if (targetId.startsWith("audio-out") && sourceWrapper) {
             if (sourceId.startsWith("synth")) {
-                (sourceMega as MegaSynth).enable(); // TODO: casting is bad
-                sourceMega.connectToOutput();
+                (sourceWrapper as WrapperSynth).enable(); // TODO: casting is bad
+                sourceWrapper.connectToOutput();
             } else {
-              sourceMega.connectToOutput();
+              sourceWrapper.connectToOutput();
             }
 
         // Connecting to anything else
-        } else if (sourceMega && targetMega) {
+        } else if (sourceWrapper && targetWrapper) {
             if (sourceId.startsWith("pattern") && targetId.startsWith("synth")) {
               // TODO: This allows pattern setting on edge creation but not when it changes on the pattern node
-              (targetMega as MegaSynth).pattern = (sourceMega as MegaPattern).getPattern();
-              if (targetMega.isConnected) {
-                (targetMega as MegaSynth).disable();
-                (targetMega as MegaSynth).enable(); // TODO: again - casting is bad
+              (targetWrapper as WrapperSynth).pattern = (sourceWrapper as WrapperPattern).getPattern();
+              if (targetWrapper.isConnected) {
+                (targetWrapper as WrapperSynth).disable();
+                (targetWrapper as WrapperSynth).enable(); // TODO: again - casting is bad
               }
             } else {
-              sourceMega.connect(targetMega)
+              sourceWrapper.connect(targetWrapper)
             }
         }
     }
@@ -94,10 +94,10 @@
     if (params.nodes.length > 0) {
       params.nodes.forEach(node => {
         if (node.type == "synth" || node.type == "delay" || node.type == "reverb" || node.type == "phaser") {
-          let mega = getMegaObjectById(node.id)
-          if (mega) {
-            mega.disconnect();
-            megaMap.delete(node.id)
+          let wrapper = getWrapperObjectById(node.id)
+          if (wrapper) {
+            wrapper.disconnect();
+            wrapperMap.delete(node.id)
           }
         }
       });
@@ -107,25 +107,25 @@
 
     if (params.edges) {
       const edge = params.edges[0]
-      let megaSource = getMegaObjectById(edge.source)
+      let wrapperSource = getWrapperObjectById(edge.source)
 
       // Check if the edge is from a synth or an effect
-      if (edge.source?.startsWith('synth') && megaSource) {
-        megaSource.disconnect();
-        (megaSource as MegaSynth).disable(); // TODO: bad cast
+      if (edge.source?.startsWith('synth') && wrapperSource) {
+        wrapperSource.disconnect();
+        (wrapperSource as WrapperSynth).disable(); // TODO: bad cast
         return;
       }
 
-      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  edge.source?.startsWith('audio-out') && megaSource) {
-        let megaTarget = getMegaObjectById(edge.target)
-        if (megaTarget) {
-          megaSource.disconnect(megaTarget.getNode()) // TODO: bad cast
+      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  edge.source?.startsWith('audio-out') && wrapperSource) {
+        let wrapperTarget = getWrapperObjectById(edge.target)
+        if (wrapperTarget) {
+          wrapperSource.disconnect(wrapperTarget.getNode()) // TODO: bad cast
         }
         return;
       }
 
-      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  !edge.source?.startsWith('audio-out') && megaSource) {
-        megaSource.disconnect()
+      if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  !edge.source?.startsWith('audio-out') && wrapperSource) {
+        wrapperSource.disconnect()
         return;
       }
     }
