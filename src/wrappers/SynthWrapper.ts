@@ -1,9 +1,9 @@
 import { get, writable, type Writable } from "svelte/store";
 import * as Tone from "tone";
 import { patterns, pitches, shapes } from "../consts";
-import { WrapperNode } from "./WrapperNode";
+import { GenericWrapper } from "./GenericWrapper";
 
-export class WrapperSynth extends WrapperNode {
+export class WrapperSynth extends GenericWrapper {
   // TODO: Rename these to actual slider types
   volume: Writable<number>;
   pitch: Writable<number>;
@@ -55,7 +55,7 @@ export class WrapperSynth extends WrapperNode {
     return this.synthObject;
   }
 
-  connect(wrapperNode: WrapperNode): void {
+  connect(wrapperNode: GenericWrapper): void {
     super.connect(wrapperNode);
     this.enable();
   }

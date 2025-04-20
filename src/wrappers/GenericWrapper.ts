@@ -1,6 +1,6 @@
 import * as Tone from "tone";
 
-export abstract class WrapperNode {
+export abstract class GenericWrapper {
   id: string;
   isConnected: boolean;
 
@@ -11,7 +11,7 @@ export abstract class WrapperNode {
 
   abstract getNode(): Tone.ToneAudioNode;
 
-  connect(wrapperNode: WrapperNode): void {
+  connect(wrapperNode: GenericWrapper): void {
     this.getNode().connect(wrapperNode.getNode());
   }
 

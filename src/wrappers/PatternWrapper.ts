@@ -1,8 +1,8 @@
 import * as Tone from "tone";
-import { WrapperNode } from "./WrapperNode";
+import { GenericWrapper } from "./GenericWrapper";
 import { writable, type Writable } from "svelte/store";
 
-export class WrapperPattern extends WrapperNode {
+export class WrapperPattern extends GenericWrapper {
     pattern: Writable<string>;
     private patternString: string;
     type: string = "pattern";

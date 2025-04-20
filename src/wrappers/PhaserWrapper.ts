@@ -1,8 +1,8 @@
 import * as Tone from "tone";
-import { WrapperNode } from "./WrapperNode";
+import { GenericWrapper } from "./GenericWrapper";
 import { writable, type Writable } from "svelte/store";
 
-export class WrapperPhaser extends WrapperNode {
+export class WrapperPhaser extends GenericWrapper {
   frequency: Writable<number>;
   octaves: Writable<number>;
   baseFrequency: Writable<number>;
