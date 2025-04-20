@@ -29,7 +29,7 @@
     showHelp = false;
   }
   
-  // Setup nodes - always start with a non-deletable audio-out
+  // Setup initial nodes - always start with a non-deletable audio-out
   const nodes = writable<Node[]>([
     {
       id: 'audio-out_1',
@@ -64,12 +64,10 @@
     function connectAudioNodes(sourceId: string, targetId: string) {
         // Get the associate wrapper (Tone) object for the source and target
         // Some do not have a wrapper object and don't need it, e.g. audio-out
-        // For now pattern has no wrapper object either
         const sourceWrapper = getWrapperObjectById(sourceId);
         const targetWrapper = getWrapperObjectById(targetId);
 
         // Connecting to the output
-        // sourceWrapper WrapperNode, targetWrapper null
         if (targetId.startsWith("audio-out") && sourceWrapper) {
             if (sourceId.startsWith("synth")) {
                 (sourceWrapper as WrapperSynth).enable(); // TODO: casting is bad
@@ -101,7 +99,8 @@
     ]);
   }
 
-  function onDelete(params: { nodes: Node[]; edges: Edge[] }) {
+  // Disconnect appropriate wrappers on node/edge deletion
+  function onDelete(params: { nodes: Node[]; edges: Edge[] }): void {
     if (params.nodes.length > 0) {
       params.nodes.forEach(node => {
         if (node.type == "synth" || node.type == "delay" || node.type == "reverb" || node.type == "phaser") {
@@ -112,10 +111,7 @@
           }
         }
       });
-
-      return;
     }
-
     if (params.edges) {
       const edge = params.edges[0]
       let wrapperSource = getWrapperObjectById(edge.source)
@@ -142,12 +138,12 @@
     }
   }
 
+  // Apply appropriate styles on edge creation
   function onEdgeCreate(connection: Connection): Edge {
     let style = false
     if (connection.source?.startsWith('pattern')) {
       style = true
     }
-
     // For each edge, connect the source to the target
     return {
       // Do not specify 'id' - let SvelteFlow handle this
@@ -157,12 +153,12 @@
     }
   }
 
-  // Run when a node-node connection is attempted
+  // Update routing on node-node connection attempt
   function onConnect(): void {
     updateAudioRouting(get(edges));
   }
 
-  // Run when a connection is at validation stage
+  // Validate when a connection is at validation stage
   const isValidConnection = (connection) => {
     const { source, sourceHandle, target, targetHandle } = connection;
     // Block pattern edges to anything but synths, block any non-pattern edges to synths
@@ -199,6 +195,7 @@
   {#if showHelp}
     <Modal closeModal={closeHelp} title={helpModalContent.title} body={helpModalContent.body} />
   {/if}
+  
   <style>
    .help-button {
     position: fixed !important;
