@@ -1,17 +1,15 @@
-import TestColourNode from "./components/TestColourNode.svelte";
-import SynthesizerNode from "./components/SynthesizerNode.svelte";
-import AudioOutNode from "./components/AudioOutNode.svelte";
-import PatternNode from "./components/PatternNode.svelte";
-import DelayNode from "./components/DelayNode.svelte";
-import ReverbNode from "./components/ReverbNode.svelte";
+import SynthesizerNode from "./components/nodes/SynthesizerNode.svelte";
+import AudioOutNode from "./components/nodes/AudioOutNode.svelte";
+import PatternNode from "./components/nodes/PatternNode.svelte";
+import DelayNode from "./components/nodes/DelayNode.svelte";
+import ReverbNode from "./components/nodes/ReverbNode.svelte";
 import { Position, type Edge } from "@xyflow/svelte";
 import type { OmniOscillatorType } from "tone/build/esm/source/oscillator/OscillatorInterface";
 import { writable } from "svelte/store";
-import PhaserNode from "./components/PhaserNode.svelte";
+import PhaserNode from "./components/nodes/PhaserNode.svelte";
 import type { WrapperNode } from "./wrappers/WrapperNode";
 
 export const defaultBPM = 150;
-export const defaultEdges = writable<Edge[]>([]);
 export const wrapperMap = new Map<string, WrapperNode>();
 
 // Set node types

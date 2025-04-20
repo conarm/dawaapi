@@ -1,1 +1,0 @@
-export const wrapperMap = new Map<string, any>();

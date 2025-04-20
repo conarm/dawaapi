@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Handle, Position, type NodeProps } from '@xyflow/svelte';
   import type { Writable } from 'svelte/store';
-    import { pitches, shapes } from '../consts';
+    import { pitches, shapes } from '../../consts';
 
   export let data: { 
     slider1: Writable<number>,

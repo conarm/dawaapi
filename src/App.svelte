@@ -16,8 +16,8 @@
   import { WrapperSynth } from './wrappers/SynthWrapper';
   import { WrapperPattern } from './wrappers/PatternWrapper';
   import { createNode } from './NodeFactory';
-  import Modal from './components/Modal.svelte';
-  import NodeMenu from './components/NodeMenu.svelte';
+  import Modal from './components/common/Modal.svelte';
+  import NodeMenu from './components/common/NodeMenu.svelte';
 
   let showHelp = false;
 
@@ -29,6 +29,7 @@
     showHelp = false;
   }
   
+  // Setup nodes - always start with a non-deletable audio-out
   const nodes = writable<Node[]>([
     {
       id: 'audio-out_1',
@@ -39,9 +40,11 @@
     },
   ]);
 
-  // Set default edge
-  let edges = defaultEdges;
 
+  // Set default edge
+  let edges = writable<Edge[]>([]);
+
+  // Start Tone Transport after page is rendered
   onMount(async () => {
     Tone.getTransport().bpm.value = defaultBPM;
     Tone.getTransport().start(); // Start the audio context
@@ -51,7 +54,8 @@
     return wrapperMap.get(id);
   }
 
-  function updateAudioRouting(nodes: Node[], currentEdges: Edge[]) {
+  // Update the audio routing using the appropriate Wrapper objects, based on the list of edges
+  function updateAudioRouting(currentEdges: Edge[]) {
     // For each edge, connect the source to the target
     currentEdges.forEach(edge => {
       connectAudioNodes(edge.source, edge.target);
@@ -153,11 +157,12 @@
     }
   }
 
-  function onConnect(connection: Connection): void {
-    // TODO: do something with connection? make it so that we aren't updating the whole audio graph each time?
-    updateAudioRouting(get(nodes), get(edges));
+  // Run when a node-node connection is attempted
+  function onConnect(): void {
+    updateAudioRouting(get(edges));
   }
 
+  // Run when a connection is at validation stage
   const isValidConnection = (connection) => {
     const { source, sourceHandle, target, targetHandle } = connection;
     // Block pattern edges to anything but synths, block any non-pattern edges to synths
@@ -165,8 +170,7 @@
           !source?.startsWith('pattern') && target?.startsWith('synth')) {
       return false;
     }
-
-    return true; // Block all other connections
+    return true; // Allow all other connections
   };
 </script>
 
@@ -195,7 +199,6 @@
   {#if showHelp}
     <Modal closeModal={closeHelp} title={helpModalContent.title} body={helpModalContent.body} />
   {/if}
-
   <style>
    .help-button {
     position: fixed !important;
