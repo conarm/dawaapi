@@ -1,11 +1,14 @@
 <script>
+    export let title;
+    export let body;
     export let closeModal;
 </script>
 
 <div class="help-modal-overlay" aria-hidden="true" on:click={closeModal}> <!-- TODO: WHAT IS ARIA HIDDEN FOR -->
     <div class="help-modal">
       <button class="close-help-button" on:click={closeModal}>&times;</button>
-    <slot />
+      {@html title}
+      {@html body}
     </div>
   </div>
 
