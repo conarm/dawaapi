@@ -5,15 +5,13 @@ import DelayNode from "./components/nodes/DelayNode.svelte";
 import ReverbNode from "./components/nodes/ReverbNode.svelte";
 import { Position, type Edge } from "@xyflow/svelte";
 import type { OmniOscillatorType } from "tone/build/esm/source/oscillator/OscillatorInterface";
-import { writable } from "svelte/store";
 import PhaserNode from "./components/nodes/PhaserNode.svelte";
 import type { GenericWrapper } from "./wrappers/GenericWrapper";
 
-export const defaultBPM = 150;
+// Initialise wrapper storage dictionary
 export const wrapperMap = new Map<string, GenericWrapper>();
 
-// Set node types
-// The 'type' property on Nodes in the node array should match any of these typenames (or just not specify 'type')
+// Node types/components - indexed using each Nodes' type property to find the appropriate component
 export const nodeTypes = {
   synth: SynthesizerNode,
   "audio-out": AudioOutNode,
@@ -23,35 +21,31 @@ export const nodeTypes = {
   phaser: PhaserNode,
 };
 
-export const helpModalContent = {
-  title: `<h2>Help</h2>`,
-  body: `
-    <p>A range of nodes can be added to the canvas. These nodes can either generate an audio signal or apply effects to an audio signal. Nodes can be added by left-clicking the appropriate buttons on the node menu. Nodes can be connected by dragging the connection dots to the left and right of each node. The left connection dot is an input and the right connection dot is an output. To connect any node X to any node Y, click and drag from node X's right-hand dot (node X's output) to node Y's left-hand dot (node Y's input). Not all nodes have both connection dots.</p>
+// Nodes and groups - Use for the node menu
+export const groupedNodeTypes = {
+  "Audio Generators": {
+    synth: nodeTypes.synth
+  },
+  "Effects": {
+    reverb: nodeTypes.reverb,
+    delay: nodeTypes.delay,
+    phaser: nodeTypes.phaser
+  },
+  "Controls": {
+    pattern: nodeTypes.pattern
+  },
+};
 
-    <h3>Audio generator nodes</h3>
-
-    Audio generator nodes should not have any input, since they are found at the start of a chain. Currently you can connect a pattern node, however in the future this may change.
-    <ul>
-      <li>Synth</li>
-    </ul>
-
-    <h3>Audio effect nodes</h3>
-    <ul>
-      <li>Delay</li>
-      <li>Reverb</li>
-      <li>Phaser</li>
-    </ul>
-    <h3>Audio output node</h3>
-    <p>There is a single Audio Output node. Any chain connected to this node will output audio to the browser. Note that you will not hear anything unless an audio chain goes into this node.</p>
-  `
-}
-
+// Default values for nodes
 export const nodeDefaults = {
   sourcePosition: Position.Right,
   targetPosition: Position.Left,
 };
 
-// TODO: Use the Tone.JS Note type for this or something? How to get an array of all notes...
+// Set default Tone.js BPM - relevant for control signals
+export const defaultBPM = 150;
+
+// Tone.JS pitch options
 export const pitches = [
   "C0",
   "D0",
@@ -118,6 +112,7 @@ export const pitches = [
   "B8",
 ];
 
+// Tone.js oscillator shape options
 export const shapes: OmniOscillatorType[] = [
   "sine",
   "square",
@@ -125,12 +120,13 @@ export const shapes: OmniOscillatorType[] = [
   "sawtooth",
 ];
 
+// Tone.js pattern options
 export const patterns: { [name: string] : any[]; } = {
   "pattern1": [
-    { time: 0, note: "C4", dur: "4n" },  // Start of measure
-    { time: "4n", note: "D4", dur: "4n" }, // Quarter note later
-    { time: "2n", note: "E4", dur: "4n" }, // Halfway through measure
-    { time: "2n + 4n", note: "F4", dur: "8n" } // Three-quarters through measure
+    { time: 0, note: "C4", dur: "4n" },
+    { time: "4n", note: "D4", dur: "4n" },
+    { time: "2n", note: "E4", dur: "4n" },
+    { time: "2n + 4n", note: "F4", dur: "8n" }
   ],
   "pattern2": [ 
     { time: 0, note: "C4", dur: "4n" },
@@ -166,4 +162,28 @@ export const patterns: { [name: string] : any[]; } = {
     { time: 0, note: "C4", dur: "4n" },
     { time: "2n", note: "G4", dur: "16n" },
   ],
+}
+
+// HTML content for the help modal
+export const helpModalContent = {
+  title: `<h2>Help</h2>`,
+  body: `
+    <p>A range of nodes can be added to the canvas. These nodes can either generate an audio signal or apply effects to an audio signal. Nodes can be added by left-clicking the appropriate buttons on the node menu. Nodes can be connected by dragging the connection dots to the left and right of each node. The left connection dot is an input and the right connection dot is an output. To connect any node X to any node Y, click and drag from node X's right-hand dot (node X's output) to node Y's left-hand dot (node Y's input). Not all nodes have both connection dots.</p>
+
+    <h3>Audio generator nodes</h3>
+
+    Audio generator nodes should not have any input, since they are found at the start of a chain. Currently you can connect a pattern node, however in the future this may change.
+    <ul>
+      <li>Synth</li>
+    </ul>
+
+    <h3>Audio effect nodes</h3>
+    <ul>
+      <li>Delay</li>
+      <li>Reverb</li>
+      <li>Phaser</li>
+    </ul>
+    <h3>Audio output node</h3>
+    <p>There is a single Audio Output node. Any chain connected to this node will output audio to the browser. Note that you will not hear anything unless an audio chain goes into this node.</p>
+  `
 }
