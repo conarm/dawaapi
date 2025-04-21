@@ -112,18 +112,26 @@
         }
       });
     }
+
     if (params.edges) {
       const edge = params.edges[0]
       let wrapperSource = getWrapperObjectById(edge.source)
+      let wrapperTarget = getWrapperObjectById(edge.target)
 
       // Check if the edge is from a synth or an effect
-      if (edge.source?.startsWith('synth') && wrapperSource) {
-        wrapperSource.disconnect();
-        (wrapperSource as WrapperSynth).disable(); // TODO: bad cast
+      if (edge.source?.startsWith('synth') && wrapperSource && wrapperTarget) {
+        wrapperSource.disconnect(wrapperTarget.getNode());
+        // (wrapperSource as WrapperSynth).disable(); // TODO: bad cast
         return;
       }
 
-      // Check if
+      // Check if the edge is from a synth to the audio output
+      if (edge.source?.startsWith('synth') && wrapperSource && !wrapperTarget) {
+        wrapperSource.disconnect(Tone.getDestination());
+        return;
+      }
+
+      // Check if the edge is from anything to a wrapper
       if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  edge.source?.startsWith('audio-out') && wrapperSource) {
         let wrapperTarget = getWrapperObjectById(edge.target)
         if (wrapperTarget) {
