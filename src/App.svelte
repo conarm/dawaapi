@@ -16,8 +16,8 @@
   import { WrapperSynth } from './wrappers/SynthWrapper';
   import { WrapperPattern } from './wrappers/PatternWrapper';
   import { createNode } from './NodeFactory';
-  import Modal from './components/common/Modal.svelte';
-  import NodeMenu from './components/common/NodeMenu.svelte';
+  import Modal from './components/ui/Modal.svelte';
+  import NodeMenu from './components/ui/NodeMenu.svelte';
 
   let showHelp = false;
 
@@ -29,7 +29,7 @@
     showHelp = false;
   }
   
-  // Setup initial nodes - always start with a non-deletable audio-out
+  // Setup nodes array - always start with a non-deletable audio-out
   const nodes = writable<Node[]>([
     {
       id: 'audio-out_1',
@@ -41,7 +41,7 @@
   ]);
 
 
-  // Set default edge
+  // Setup edge array
   let edges = writable<Edge[]>([]);
 
   // Start Tone Transport after page is rendered
