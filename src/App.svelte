@@ -123,6 +123,7 @@
         return;
       }
 
+      // Check if
       if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  edge.source?.startsWith('audio-out') && wrapperSource) {
         let wrapperTarget = getWrapperObjectById(edge.target)
         if (wrapperTarget) {
@@ -134,6 +135,13 @@
       if (!edge.source?.startsWith('synth') && !edge.source?.startsWith('pattern') &&  !edge.source?.startsWith('audio-out') && wrapperSource) {
         wrapperSource.disconnect()
         return;
+      }
+
+      if (edge.source?.startsWith('pattern')) {
+        let wrapperTarget = getWrapperObjectById(edge.target);
+        (wrapperTarget as WrapperSynth).pattern = '';
+        (wrapperTarget as WrapperSynth).disable();
+        (wrapperTarget as WrapperSynth).enable();
       }
     }
   }
@@ -159,14 +167,25 @@
   }
 
   // Validate when a connection is at validation stage
-  const isValidConnection = (connection) => {
+  const isValidConnection = (connection: Connection) => {
     const { source, sourceHandle, target, targetHandle } = connection;
+
     // Block pattern edges to anything but synths, block any non-pattern edges to synths
     if ((source?.startsWith('pattern') && !target?.startsWith('synth')) ||
           !source?.startsWith('pattern') && target?.startsWith('synth')) {
       return false;
     }
-    return true; // Allow all other connections
+
+    // Block more than one edge going into a synth from ny pattern
+    if (source?.startsWith('pattern')) {
+      const incoming = get(edges).filter(edge => edge.target === target);
+      if (incoming.length > 0) { // use 0 because this runs before the edge is applied
+        return false
+      }
+    }
+    
+    // Allow all other connections
+    return true;
   };
 </script>
 

@@ -10,7 +10,7 @@ type NodeCreator = (id: string) => Node;
 
 const nodeCreators: Record<string, NodeCreator> = {
   synth: (id) => {
-    const inst = new WrapperSynth(id, 0, 0, 0, '', false);
+    const inst = new WrapperSynth(id, 0, 10, 0, '', false);
     wrapperMap.set(id, inst);
     return {
       id,
