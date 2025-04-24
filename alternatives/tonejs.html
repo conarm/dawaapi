@@ -10,15 +10,12 @@
     const synthCount = 50;
     synths = [];
     for(let i = 0; i < synthCount; i++) {
-        console.log("pushing a synth")
         synth = new Tone.Synth().toDestination()
         synths.push(synth)
     }
 
     document.getElementById('play').addEventListener('click', async () => {
-      await Tone.start(); // Required to resume AudioContext
-      console.log("about to trigger")
-      console.log(synths)
+      await Tone.start();
       for (let i = 0; i < synthCount; i++) {
         synths[i].triggerAttack("F1");
       }
