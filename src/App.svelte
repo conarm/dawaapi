@@ -18,6 +18,8 @@
   import { createNode } from './NodeFactory';
   import Modal from './components/ui/Modal.svelte';
   import NodeMenu from './components/ui/NodeMenu.svelte';
+  import { generateSynthEffectsChainTestCase, generateSynthChainTestCase, generateDisconnectedNodesTestCase } from './tests/testData';
+  import { generateNodeId } from './helpers';
 
   let showHelp = false;
 
@@ -29,20 +31,45 @@
     showHelp = false;
   }
   
-  // Setup nodes array - always start with a non-deletable audio-out
-  const nodes = writable<Node[]>([
-    {
-      id: 'audio-out_1',
-      data: {  },
-      position: { x: 350, y: 230 },
-      type: 'audio-out',
-      deletable: false
-    },
-  ]);
+  const testMode = true;
 
+  let initialNodes: Node[] = [{
+        id: 'audio-out_1',
+        data: {  },
+        position: { x: 350, y: 230 },
+        type: 'audio-out',
+        deletable: false
+      }];
 
-  // Setup edge array
-  let edges = writable<Edge[]>([]);
+  let initialEdges: Edge[] = [];
+
+  if (testMode) {
+    // const testCase = generateSynthEffectsChainTestCase(3, 5);
+
+    // const testCase = generateSynthChainTestCase(1)
+    // const testCase = generateSynthChainTestCase(5)
+    // const testCase = generateSynthChainTestCase(9)
+    // const testCase = generateSynthChainTestCase(13)
+    // const testCase = generateSynthChainTestCase(17)
+    // const testCase = generateSynthChainTestCase(21)
+    // const testCase = generateSynthChainTestCase(25)
+    // const testCase = generateSynthChainTestCase(29)
+    // const testCase = generateSynthChainTestCase(33)
+    // const testCase = generateSynthChainTestCase(37)
+    // const testCase = generateSynthChainTestCase(41)
+    // const testCase = generateSynthChainTestCase(45)
+    // const testCase = generateSynthChainTestCase(49)
+    // const testCase = generateSynthChainTestCase(53)
+    // const testCase = generateSynthChainTestCase(57)
+    const testCase = generateSynthChainTestCase(61)
+    
+    initialNodes = testCase.nodes;
+    initialEdges = testCase.edges;
+  }
+
+  const nodes = writable<Node[]>(initialNodes)
+  const edges = writable<Edge[]>(initialEdges)
+  
 
   // Start Tone Transport after page is rendered
   onMount(async () => {
@@ -95,7 +122,7 @@
   function addNode(label: any) {
     nodes.update((n) => [
       ...n,
-      createNode(label, label + '_' + Date.now().toString()) // TODO: Make an ID generator function
+      createNode(label, generateNodeId(label))
     ]);
   }
 
