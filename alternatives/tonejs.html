@@ -7,7 +7,7 @@
         <button id="play">Play Synth(s)</button>
 
         <script>
-            const synthCount = 50; // Vary this parameter for testing performance
+            const synthCount = 1; // Vary this parameter for testing performance
             synths = [];
             for(let i = 0; i < synthCount; i++) {
                 synth = new Tone.Synth().toDestination()
@@ -18,7 +18,7 @@
                 await Tone.start();
                 // Start all synths
                 for (let i = 0; i < synthCount; i++) {
-                    synths[i].triggerAttack("F1");
+                    synths[i].triggerAttack("F3");
                 }
             });
         </script>

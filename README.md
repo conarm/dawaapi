@@ -52,3 +52,12 @@ There are three main categories of nodes:
 There is also an **Audio Output** node - any audio signal connected this will be made audible to the user.
 
 Nodes can be connected by dragging the connection dots to the left and right of each node. The left connection dot is an input and the right connection dot is an output. To connect any node X to any node Y, click and drag from node X's right-hand dot (node X's output) to node Y's left-hand dot (node Y's input).
+
+## Licensing
+
+The external technologies used in the implementation of this project are as follows:
+
+ - Web Audio API: https://www.w3.org/TR/webaudio-1.1/
+ - Svelte, Copyright (c) 2016-2025 Svelte Contributors (MIT license): https://svelte.dev/
+ - SvelteFlow, Copyright (c) 2023 xyflow (MIT license): https://svelteflow.dev/
+ - Tone.js, Copyright (c) 2014-2020 Yotam Mann (MIT license): https://tonejs.github.io/

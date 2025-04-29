@@ -31,7 +31,7 @@
     showHelp = false;
   }
   
-  const testMode = true;
+  const testMode = false;
 
   let initialNodes: Node[] = [{
         id: 'audio-out_1',
@@ -61,7 +61,7 @@
     // const testCase = generateSynthChainTestCase(49)
     // const testCase = generateSynthChainTestCase(53)
     // const testCase = generateSynthChainTestCase(57)
-    const testCase = generateSynthChainTestCase(61)
+    const testCase = generateSynthChainTestCase(120)
     
     initialNodes = testCase.nodes;
     initialEdges = testCase.edges;
