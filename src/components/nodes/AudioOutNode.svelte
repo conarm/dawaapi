@@ -26,13 +26,14 @@
     <div class="info-popup">
         <div class="info-content">
             <h3>AudioOut</h3>
-            <p>This node outputs to speakers.</p>
+            <p>This node outputs any incoming audio streams to the speakers.</p>
             <button class="close-button" on:click={() => showInfo = false}>Close</button>
         </div>
     </div>
   {/if}
 
   <style>
+    /* Output node */
     .output {
       padding: 1rem;
       background: #fff;
@@ -61,6 +62,7 @@
     transform: translate(-50%, -50%);
     background: white;
     padding: 20px;
+    width: 200px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     z-index: 100;

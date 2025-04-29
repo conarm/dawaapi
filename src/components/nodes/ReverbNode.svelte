@@ -65,7 +65,8 @@
   <div class="info-popup">
       <div class="info-content">
           <h3>Reverb</h3>
-          <p>This node adds reverb.</p>
+          <p>This node adds a Reverb effect to an Audio Signal, simulating a sound playing in a large room, such as a church.</p>
+          <p><b>Room size</b> is correlated to the decay time of the reverb. <b>Wet</b> is the amount of effected signal given to the output (at 0, the effect cannot be heard, at 1, the effect can exclusively be heard).</p>
           <button class="close-button" on:click={() => showInfo = false}>Close</button>
       </div>
   </div>
@@ -101,6 +102,7 @@
     transform: translate(-50%, -50%);
     background: white;
     padding: 20px;
+    width: 200px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     z-index: 100;

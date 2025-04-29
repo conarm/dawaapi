@@ -65,13 +65,13 @@
   <div class="info-popup">
       <div class="info-content">
           <h3>Delay</h3>
-          <p>This node adds Delay.</p>
+          <p>This node adds a Delay effect to an Audio Signal, with changes to it audibly repeating.</p>
+          <p><b>Time</b> is the amount of seconds that the incoming signal is delayed. <b>Feedback</b> is the amount of effected signal fed back into the delay</p>
           <button class="close-button" on:click={() => showInfo = false}>Close</button>
       </div>
   </div>
   {/if}
 
-  <!-- TODO: what's a rem? -->
   <style>
     .sliders {
       padding: 1rem;
@@ -101,6 +101,7 @@
     transform: translate(-50%, -50%);
     background: white;
     padding: 20px;
+    width: 200px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     z-index: 100;

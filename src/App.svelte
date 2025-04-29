@@ -234,6 +234,7 @@
     onedgecreate = {onEdgeCreate}
     onconnect = {onConnect}
     isValidConnection={isValidConnection}
+    deleteKey={["Delete", "Backspace"]}
     >
     <Controls />  
     <Background />

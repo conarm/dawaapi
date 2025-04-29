@@ -62,7 +62,8 @@
   <div class="info-popup">
       <div class="info-content">
           <h3>Pattern</h3>
-          <p>This node plays a Synthesizer.</p>
+          <p>This node outputs a Control Signal which will tell a Synth to play a pattern of notes.</p>
+          <p><b>Pattern</b> determines what this pattern is.</p>
           <button class="close-button" on:click={() => showInfo = false}>Close</button>
       </div>
   </div>
@@ -98,6 +99,7 @@
     transform: translate(-50%, -50%);
     background: white;
     padding: 20px;
+    width: 200px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     z-index: 100;

@@ -79,7 +79,8 @@
   <div class="info-popup">
       <div class="info-content">
           <h3>Reverb</h3>
-          <p>This node adds reverb.</p>
+          <p>This node adds a Phaser effect to an Audio Signal, using a changing filter at specified frequencies to create a sweeping effect.</p>
+          <p><b>Frequency</b> is the speed of the phasing. <b>Octaves</b> is the number of octaves the phase goes above the base frequency. <b>Base frequency</b> is the frequency the phase starts at.</p>
           <button class="close-button" on:click={() => showInfo = false}>Close</button>
       </div>
   </div>
@@ -115,6 +116,7 @@
     transform: translate(-50%, -50%);
     background: white;
     padding: 20px;
+    width: 200px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     z-index: 100;
