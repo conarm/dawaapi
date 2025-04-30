@@ -86,7 +86,6 @@
   </div>
   {/if}
 
-  <!-- TODO: what's a rem? -->
   <style>
     .sliders {
       padding: 1rem;

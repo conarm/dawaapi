@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Handle, Position, type NodeProps } from '@xyflow/svelte';
+  import { Handle, Position } from '@xyflow/svelte';
     import type { Writable } from 'svelte/store';
    
   </script>
@@ -22,8 +22,4 @@
       border: var(--xy-node-border, var(--xy-node-border-default));
       font-size: 0.7rem;
     }
-    /* img {
-      width: 20%;
-      height: 20%;
-    } */
   </style>
