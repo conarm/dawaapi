@@ -1,12 +1,14 @@
 <script>
-    export let title;
-    export let body;
-    export let closeModal;
+  // Accept content and a passed in close function
+  export let title;
+  export let body;
+  export let closeModal;
 </script>
 
-<div class="help-modal-overlay" aria-hidden="true" on:click={closeModal}> <!-- TODO: WHAT IS ARIA HIDDEN FOR -->
+<div class="help-modal-overlay" aria-hidden="true" on:click={closeModal}>
     <div class="help-modal">
       <button class="close-help-button" on:click={closeModal}>&times;</button>
+      <!-- Insert the passed in HTML content -->
       {@html title}
       {@html body}
     </div>
@@ -19,11 +21,10 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* slightly transparent */
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 999;
   }
 
   .help-modal {
@@ -32,14 +33,13 @@
     border-radius: 1rem;
     max-width: 80%;
     width: 90%;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     position: relative;
-    overflow: auto; /* TODO: make it scrollable with loads of text */
   }
 
   .close-help-button {
     position: absolute;
-    top: 0.5rem;
+    top: 1rem;
     right: 1rem;
     background: none;
     border: none;

@@ -31,7 +31,6 @@
     showHelp = false;
   }
   
-  const testMode = false;
 
   let initialNodes: Node[] = [{
         id: 'audio-out_1',
@@ -43,25 +42,11 @@
 
   let initialEdges: Edge[] = [];
 
+  const testMode = false;
   if (testMode) {
-    // const testCase = generateSynthEffectsChainTestCase(3, 5);
-
-    // const testCase = generateSynthChainTestCase(1)
-    // const testCase = generateSynthChainTestCase(5)
-    // const testCase = generateSynthChainTestCase(9)
-    // const testCase = generateSynthChainTestCase(13)
-    // const testCase = generateSynthChainTestCase(17)
-    // const testCase = generateSynthChainTestCase(21)
-    // const testCase = generateSynthChainTestCase(25)
-    // const testCase = generateSynthChainTestCase(29)
-    // const testCase = generateSynthChainTestCase(33)
-    // const testCase = generateSynthChainTestCase(37)
-    // const testCase = generateSynthChainTestCase(41)
-    // const testCase = generateSynthChainTestCase(45)
-    // const testCase = generateSynthChainTestCase(49)
-    // const testCase = generateSynthChainTestCase(53)
-    // const testCase = generateSynthChainTestCase(57)
-    const testCase = generateSynthChainTestCase(120)
+    // Configurable test case - set testMode to true and pass in parameters to test
+    // generateSynthEffectsChainTestCase, generateSynthChainTestCase & generateDisconnectedNodesTestCase are available
+    const testCase = generateSynthEffectsChainTestCase(10)
     
     initialNodes = testCase.nodes;
     initialEdges = testCase.edges;

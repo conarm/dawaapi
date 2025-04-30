@@ -11,8 +11,11 @@ export class WrapperDelay extends GenericWrapper {
   constructor(id: string, initDelayTime: number, initFeedback: number) {
     super(id);
 
+    // Set up Tone params
     this.delayTime = writable(initDelayTime);
     this.feedback = writable(initFeedback);
+
+    // Initialise custom Tone object
     this.delayObject = new Tone.FeedbackDelay(0.5);
     this.delayObject.set({ wet: 0.8 });
 

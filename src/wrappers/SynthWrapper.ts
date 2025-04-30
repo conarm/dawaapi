@@ -23,8 +23,10 @@ export class WrapperSynth extends GenericWrapper {
   ) {
     super(id, isConnected);
 
+    // Initialise custom Tone object
     this.synthObject = new Tone.Synth();
 
+    // Set up Tone params
     this.volume = writable(initVolume);
     this.pitch = writable(initPitch);
     this.shape = writable(initShape);
@@ -64,7 +66,6 @@ export class WrapperSynth extends GenericWrapper {
     this.isConnected = true;
     if (this.pattern != '') {
       // enabled with pattern
-      console.log("enabling pattern!")
       this.part.stop()
       this.part = new Tone.Part(
         (time, event) => {

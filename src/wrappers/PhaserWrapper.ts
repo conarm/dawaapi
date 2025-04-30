@@ -17,9 +17,12 @@ export class WrapperPhaser extends GenericWrapper {
   ) {
     super(id);
 
+    // Set up Tone params
     this.frequency = writable(initFrequency);
     this.octaves = writable(initOctaves);
     this.baseFrequency = writable(initBaseFrequency);
+
+    // Initialise custom Tone object
     this.phaserObject = new Tone.Phaser({
       frequency: 15,
       octaves: 5,

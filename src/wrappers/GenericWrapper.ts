@@ -20,7 +20,6 @@ export abstract class GenericWrapper {
   }
 
   disconnect(target?: Tone.ToneAudioNode): void {
-    console.log("disconnecting node")
     if (target) {
       // disconnect only from target
       this.getNode().disconnect(target);

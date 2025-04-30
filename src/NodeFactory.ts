@@ -1,26 +1,26 @@
-import type { Node } from '@xyflow/svelte'; // or 'reactflow' if it's the React version
-import { wrapperMap } from './consts';
-import { WrapperSynth } from './wrappers/SynthWrapper';
-import { WrapperDelay } from './wrappers/DelayWrapper';
-import { WrapperReverb } from './wrappers/ReverbWrapper';
-import { WrapperPhaser } from './wrappers/PhaserWrapper';
-import { WrapperPattern } from './wrappers/PatternWrapper';
+import type { Node } from "@xyflow/svelte";
+import { wrapperMap } from "./consts";
+import { WrapperSynth } from "./wrappers/SynthWrapper";
+import { WrapperDelay } from "./wrappers/DelayWrapper";
+import { WrapperReverb } from "./wrappers/ReverbWrapper";
+import { WrapperPhaser } from "./wrappers/PhaserWrapper";
+import { WrapperPattern } from "./wrappers/PatternWrapper";
 
 type NodeCreator = (id: string) => Node;
 
 const nodeCreators: Record<string, NodeCreator> = {
   synth: (id) => {
-    const inst = new WrapperSynth(id, 0, 10, 0, '', false);
+    const inst = new WrapperSynth(id, 0, 10, 0, "", false);
     wrapperMap.set(id, inst);
     return {
       id,
-      type: 'synth',
+      type: "synth",
       position: { x: 100, y: 100 },
       data: {
         slider1: inst.volume,
         slider2: inst.pitch,
         slider3: inst.shape,
-      }
+      },
     };
   },
 
@@ -29,12 +29,12 @@ const nodeCreators: Record<string, NodeCreator> = {
     wrapperMap.set(id, inst);
     return {
       id,
-      type: 'delay',
+      type: "delay",
       position: { x: 100, y: 100 },
       data: {
         slider1: inst.delayTime,
         slider2: inst.feedback,
-      }
+      },
     };
   },
 
@@ -43,12 +43,12 @@ const nodeCreators: Record<string, NodeCreator> = {
     wrapperMap.set(id, inst);
     return {
       id,
-      type: 'reverb',
+      type: "reverb",
       position: { x: 100, y: 100 },
       data: {
         slider1: inst.roomSize,
         slider2: inst.wet,
-      }
+      },
     };
   },
 
@@ -57,31 +57,32 @@ const nodeCreators: Record<string, NodeCreator> = {
     wrapperMap.set(id, inst);
     return {
       id,
-      type: 'phaser',
+      type: "phaser",
       position: { x: 100, y: 100 },
       data: {
         slider1: inst.frequency,
         slider2: inst.octaves,
         slider3: inst.baseFrequency,
-      }
+      },
     };
   },
 
   pattern: (id) => {
-    const inst = new WrapperPattern(id, 'pattern1');
+    const inst = new WrapperPattern(id, "pattern1");
     wrapperMap.set(id, inst);
     return {
       id,
-      type: 'pattern',
+      type: "pattern",
       position: { x: 100, y: 100 },
       data: {
         currentPattern: inst.pattern,
-      }
+      },
     };
-  }
+  },
 };
 
 export function createNode(label: string, id: string): Node {
   const creator = nodeCreators[label];
-  return creator ? creator(id) : nodeCreators['synth'](id); // TODO: Defaults to synth - correct behaviour?
+  // Get the appropriate SvelteFlow Node object for the label and id
+  return creator ? creator(id) : nodeCreators["synth"](id); // TODO: Defaults to synth - correct behaviour?
 }

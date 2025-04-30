@@ -11,8 +11,11 @@ export class WrapperReverb extends GenericWrapper {
   constructor(id: string, initRoomSize: number, initWet: number) {
     super(id);
 
+    // Set up Tone params
     this.roomSize = writable(initRoomSize);
     this.wet = writable(initWet);
+
+    // Initialise custom Tone object
     this.reverbObject = new Tone.JCReverb(0.5);
 
     this.roomSize.subscribe((val) => {
