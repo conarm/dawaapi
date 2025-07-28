@@ -4,6 +4,10 @@
 
 A node-based piece of audio synthesis software, as a layer on top of, and making use of, the Web Audio API. It aims to provide an accessible DAW as a PWA, allowing users to access the application using a browser from anywhere, without an installation overhead.
 
+## Live Version
+
+A live version of the tool can be found [here](https://conarm.github.io/dawaapi/).
+
 ## Installation
 
 ```sh
