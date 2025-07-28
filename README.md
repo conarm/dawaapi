@@ -59,7 +59,14 @@ There is also an **Audio Output** node - any audio signal connected this will be
 
 Nodes can be connected by dragging the connection dots to the left and right of each node. The left connection dot is an input and the right connection dot is an output. To connect any node X to any node Y, click and drag from node X's right-hand dot (node X's output) to node Y's left-hand dot (node Y's input).
 
+## Example
+
+Below, a Pattern node sends a control signal to a Synth node, telling it to play pattern1. This Synth node sends the resulting audio signal to the audio output, allowing the user to hear the result.
+
 ![Nodes](assets/controlsigdiff.png "Nodes")
+
+
+## Help
 
 More information on each node can be seen with the help button in the top right of each node, and detailed general help information can be found through the "?" in the top right of the screen.
 
