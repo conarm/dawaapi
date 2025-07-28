@@ -1,4 +1,4 @@
-# DAWAAPI
+# DAWAAPI - Web Audio DAW
 
 ## Introduction
 
