@@ -1,4 +1,4 @@
-# Individual Project - Web Audio API DAW
+# DAWAAPI
 
 ## Introduction
 
