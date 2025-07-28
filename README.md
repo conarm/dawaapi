@@ -4,6 +4,8 @@
 
 A node-based piece of audio synthesis software, as a layer on top of, and making use of, the Web Audio API. It aims to provide an accessible DAW as a PWA, allowing users to access the application using a browser from anywhere, without an installation overhead.
 
+![UI](assets/ui.png "UI")
+
 ## Live Version
 
 A live version of the tool can be found [here](https://conarm.github.io/dawaapi/).
@@ -56,6 +58,12 @@ There are three main categories of nodes:
 There is also an **Audio Output** node - any audio signal connected this will be made audible to the user.
 
 Nodes can be connected by dragging the connection dots to the left and right of each node. The left connection dot is an input and the right connection dot is an output. To connect any node X to any node Y, click and drag from node X's right-hand dot (node X's output) to node Y's left-hand dot (node Y's input).
+
+![Nodes](assets/controlsigdiff.png "Nodes")
+
+More information on each node can be seen with the help button in the top right of each node, and detailed general help information can be found through the "?" in the top right of the screen.
+
+![Help](assets/helpnodes.png "Help")
 
 ## Licensing
 
